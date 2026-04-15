@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import FeatureGrid from '../components/public/FeatureGrid';
 import HeroSection from '../components/public/HeroSection';
 import PublicLayout from '../components/public/PublicLayout';
+import { navigation } from '../data/publicSite';
 
 const locales = [
     { code: 'es', label: 'ES', flag: '🇪🇸', name: 'Español' },
@@ -243,7 +244,7 @@ export default function PublicLandingPage({ appName }) {
             footerCopy={current.footer}
             theme={theme}
             headerProps={{
-                navItems: current.header.navItems,
+                navItems: navigation[locale],
                 locale,
                 locales,
                 onLocaleChange: setLocale,

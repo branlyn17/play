@@ -58,15 +58,15 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                     >
                         {navItems.map((item) => (
                             <a
-                                key={item}
-                                href="#"
+                                key={typeof item === 'string' ? item : item.label}
+                                href={typeof item === 'string' ? '#' : item.href}
                                 className={`rounded-full border border-transparent px-4 py-2 text-sm font-medium transition ${
                                     isLight
                                         ? 'text-slate-600 hover:bg-white hover:text-slate-950'
                                         : 'text-white/70 hover:border-white/10 hover:bg-white/6 hover:text-white'
                                 }`}
                             >
-                                {item}
+                                {typeof item === 'string' ? item : item.label}
                             </a>
                         ))}
                     </nav>
@@ -182,15 +182,15 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                     <nav className="grid gap-2">
                         {navItems.map((item) => (
                             <a
-                                key={item}
-                                href="#"
+                                key={typeof item === 'string' ? item : item.label}
+                                href={typeof item === 'string' ? '#' : item.href}
                                 className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
                                     isLight
                                         ? 'bg-slate-50 text-slate-700 hover:bg-slate-100'
                                         : 'bg-white/6 text-white/80 hover:bg-white/10 hover:text-white'
                                 }`}
                             >
-                                {item}
+                                {typeof item === 'string' ? item : item.label}
                             </a>
                         ))}
                     </nav>

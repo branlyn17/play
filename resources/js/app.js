@@ -2,10 +2,12 @@ import './bootstrap';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import PublicCatalogPage from './pages/PublicCatalogPage';
 import PublicLandingPage from './pages/PublicLandingPage';
 
 const appElement = document.getElementById('app');
 const pages = {
+    'public-catalog': PublicCatalogPage,
     'public-home': PublicLandingPage,
 };
 
