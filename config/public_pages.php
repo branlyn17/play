@@ -14,16 +14,16 @@ return [
 
     'navigation' => [
         'es' => [
-            ['key' => 'home', 'label' => 'Inicio'],
-            ['key' => 'catalog', 'label' => 'Catalogo'],
-            ['key' => 'pricing', 'label' => 'Precios', 'href' => '#'],
-            ['key' => 'login', 'label' => 'Login', 'href' => '#'],
+            ['key' => 'home'],
+            ['key' => 'catalog'],
+            ['key' => 'pricing', 'href' => '#'],
+            ['key' => 'login', 'href' => '#'],
         ],
         'en' => [
-            ['key' => 'home', 'label' => 'Home'],
-            ['key' => 'catalog', 'label' => 'Catalog'],
-            ['key' => 'pricing', 'label' => 'Pricing', 'href' => '#'],
-            ['key' => 'login', 'label' => 'Login', 'href' => '#'],
+            ['key' => 'home'],
+            ['key' => 'catalog'],
+            ['key' => 'pricing', 'href' => '#'],
+            ['key' => 'login', 'href' => '#'],
         ],
     ],
 ];

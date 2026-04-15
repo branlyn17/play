@@ -9,12 +9,12 @@ return [
         'es' => [
             'label' => 'ES',
             'name' => 'Espanol',
-            'flag' => '🇪🇸',
+            'flag' => "\u{1F1EA}\u{1F1F8}",
         ],
         'en' => [
             'label' => 'EN',
             'name' => 'English',
-            'flag' => '🇺🇸',
+            'flag' => "\u{1F1FA}\u{1F1F8}",
         ],
     ],
 ];

@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-export default function Header({ appName, navItems, locale, locales, onLocaleChange, labels, theme, onThemeToggle }) {
+export default function Header({ appName, navItems, locale, locales, onLocaleChange, labels, uiLabels = {}, theme, onThemeToggle }) {
     const isLight = theme === 'light';
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLocaleOpen, setIsLocaleOpen] = useState(false);
     const localeRef = useRef(null);
     const activeLocale = useMemo(() => locales.find((item) => item.code === locale) ?? locales[0], [locale, locales]);
+    const headerUi = {
+        themeToggle: uiLabels.theme_toggle ?? 'Toggle theme',
+        language: uiLabels.language ?? 'Language',
+        menu: uiLabels.menu ?? 'Menu',
+        close: uiLabels.close ?? 'Close',
+    };
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -84,7 +90,7 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                                     ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                                     : 'border-white/10 bg-white/6 text-white/80 hover:bg-white/10'
                             }`}
-                            aria-label="Cambiar tema"
+                            aria-label={headerUi.themeToggle}
                         >
                             {isLight ? '☾' : '☼'}
                         </button>
@@ -159,7 +165,7 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                                 ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                                 : 'border-white/10 bg-white/6 text-white/80 hover:bg-white/10'
                         }`}
-                        aria-label="Cambiar tema"
+                        aria-label={headerUi.themeToggle}
                     >
                         {isLight ? '☾' : '☼'}
                     </button>
@@ -172,9 +178,9 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                                 ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                                 : 'border-white/10 bg-white/6 text-white hover:bg-white/10'
                         }`}
-                        aria-label="Abrir menu"
+                        aria-label={headerUi.menu}
                     >
-                        {isMenuOpen ? 'Cerrar' : 'Menu'}
+                        {isMenuOpen ? headerUi.close : headerUi.menu}
                     </button>
                 </div>
             </div>
@@ -205,7 +211,7 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
 
                     <div className="space-y-2">
                         <p className={`px-1 text-xs font-semibold uppercase tracking-[0.24em] ${isLight ? 'text-slate-500' : 'text-white/45'}`}>
-                            Idioma
+                            {headerUi.language}
                         </p>
                         <div className="grid gap-2">
                             {locales.map((item) => (

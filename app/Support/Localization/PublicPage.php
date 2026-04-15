@@ -54,7 +54,7 @@ class PublicPage
 
                 return [
                     'key' => $item['key'],
-                    'label' => $item['label'],
+                    'label' => trans("public.shared.navigation.{$item['key']}"),
                     'href' => $href,
                     'active' => $item['key'] === $currentPage,
                 ];

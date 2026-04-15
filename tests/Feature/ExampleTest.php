@@ -21,10 +21,28 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/es');
 
-        $response->assertStatus(200);
+        $response
+            ->assertStatus(200)
+            ->assertSee('lang="es"', false)
+            ->assertSee('<title>Invita Plus</title>', false)
+            ->assertSee('Empezar gratis');
 
         $catalogResponse = $this->get('/en/catalog');
 
-        $catalogResponse->assertStatus(200);
+        $catalogResponse
+            ->assertStatus(200)
+            ->assertSee('lang="en"', false)
+            ->assertSee('<title>Invita Plus | Catalog</title>', false)
+            ->assertSee('Use template');
+    }
+
+    public function test_the_spanish_catalog_slug_and_content_are_localized(): void
+    {
+        $response = $this->get('/es/catalogo');
+
+        $response
+            ->assertOk()
+            ->assertSee('<title>Invita Plus | Catalogo</title>', false)
+            ->assertSee('Usar plantilla');
     }
 }
