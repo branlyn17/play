@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import PublicLayout from '../components/public/PublicLayout';
-import { locales, navigation } from '../data/publicSite';
+import { locales as localeFallback, navigation } from '../data/publicSite';
 
 const filtersByLocale = {
     es: ['Todos', 'Boda', 'XV', 'Eventos', 'Minimal', 'Premium'],
@@ -270,11 +270,16 @@ const catalogContent = {
     },
 };
 
-export default function PublicCatalogPage({ appName }) {
-    const [locale, setLocale] = useState('es');
+export default function PublicCatalogPage({
+    appName,
+    locale: routeLocale = 'es',
+    locales: localeOptions = localeFallback,
+    navigation: navItems = [],
+}) {
     const [theme, setTheme] = useState('dark');
     const [activeFilter, setActiveFilter] = useState(filtersByLocale.es[0]);
 
+    const locale = routeLocale;
     const current = catalogContent[locale];
     const filters = filtersByLocale[locale];
 
@@ -311,10 +316,16 @@ export default function PublicCatalogPage({ appName }) {
             footerCopy={current.footer}
             theme={theme}
             headerProps={{
-                navItems: navigation[locale],
+                navItems: navItems.length > 0 ? navItems : navigation[locale],
                 locale,
-                locales,
-                onLocaleChange: setLocale,
+                locales: localeOptions,
+                onLocaleChange: (code) => {
+                    const target = localeOptions.find((item) => item.code === code);
+
+                    if (target?.href) {
+                        window.location.href = target.href;
+                    }
+                },
                 onThemeToggle: () => setTheme((value) => (value === 'dark' ? 'light' : 'dark')),
                 labels: { kicker: current.header.kicker, cta: current.header.cta },
             }}

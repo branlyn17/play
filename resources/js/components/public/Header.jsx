@@ -61,7 +61,11 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                                 key={typeof item === 'string' ? item : item.label}
                                 href={typeof item === 'string' ? '#' : item.href}
                                 className={`rounded-full border border-transparent px-4 py-2 text-sm font-medium transition ${
-                                    isLight
+                                    typeof item !== 'string' && item.active
+                                        ? isLight
+                                            ? 'bg-white text-slate-950 shadow-[0_10px_22px_rgba(148,163,184,0.18)]'
+                                            : 'border-white/10 bg-white/10 text-white'
+                                        : isLight
                                         ? 'text-slate-600 hover:bg-white hover:text-slate-950'
                                         : 'text-white/70 hover:border-white/10 hover:bg-white/6 hover:text-white'
                                 }`}
@@ -185,7 +189,11 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                                 key={typeof item === 'string' ? item : item.label}
                                 href={typeof item === 'string' ? '#' : item.href}
                                 className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
-                                    isLight
+                                    typeof item !== 'string' && item.active
+                                        ? isLight
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'bg-white text-slate-950'
+                                        : isLight
                                         ? 'bg-slate-50 text-slate-700 hover:bg-slate-100'
                                         : 'bg-white/6 text-white/80 hover:bg-white/10 hover:text-white'
                                 }`}

@@ -206,11 +206,11 @@ const content = {
     },
 };
 
-export default function PublicLandingPage({ appName }) {
-    const [locale, setLocale] = useState('es');
+export default function PublicLandingPage({ appName, locale: routeLocale = 'es', locales: localeOptions = locales, navigation: navItems = [] }) {
     const [theme, setTheme] = useState('dark');
     const [activeIndex, setActiveIndex] = useState(0);
 
+    const locale = routeLocale;
     const current = content[locale];
 
     useEffect(() => {
@@ -244,10 +244,16 @@ export default function PublicLandingPage({ appName }) {
             footerCopy={current.footer}
             theme={theme}
             headerProps={{
-                navItems: navigation[locale],
+                navItems: navItems.length > 0 ? navItems : navigation[locale],
                 locale,
-                locales,
-                onLocaleChange: setLocale,
+                locales: localeOptions,
+                onLocaleChange: (code) => {
+                    const target = localeOptions.find((item) => item.code === code);
+
+                    if (target?.href) {
+                        window.location.href = target.href;
+                    }
+                },
                 onThemeToggle: () => setTheme((value) => (value === 'dark' ? 'light' : 'dark')),
                 labels: { kicker: current.header.kicker, cta: current.header.cta },
             }}
