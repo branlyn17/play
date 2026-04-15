@@ -2,10 +2,19 @@ import './bootstrap';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import PublicHome from './components/PublicHome';
+import PublicLandingPage from './pages/PublicLandingPage';
 
 const appElement = document.getElementById('app');
+const pages = {
+    'public-home': PublicLandingPage,
+};
 
-if (appElement?.dataset.page === 'public-home') {
-    createRoot(appElement).render(createElement(PublicHome));
+if (appElement) {
+    const pageName = appElement.dataset.page;
+    const PageComponent = pages[pageName];
+    const props = appElement.dataset.props ? JSON.parse(appElement.dataset.props) : {};
+
+    if (PageComponent) {
+        createRoot(appElement).render(createElement(PageComponent, props));
+    }
 }
