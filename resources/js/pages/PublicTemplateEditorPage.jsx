@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import PublicLayout from '../components/public/PublicLayout';
 
@@ -255,6 +255,7 @@ export default function PublicTemplateEditorPage({
     saveUrl,
 }) {
     const [theme, setTheme] = useState('dark');
+    const iframeRef = useRef(null);
     const current = useMemo(() => normalizeContent(content), [content]);
     const dictionary = useMemo(() => normalizeDictionary(template.dictionary), [template.dictionary]);
     const contentFields = useMemo(() => (template.editorFields ?? []).filter((field) => field.group === 'content'), [template.editorFields]);
@@ -264,6 +265,7 @@ export default function PublicTemplateEditorPage({
     const [downloadCount, setDownloadCount] = useState(template.downloadCount);
     const [isSaving, setIsSaving] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
+    const [previewHeight, setPreviewHeight] = useState(760);
 
     useEffect(() => {
         const savedTheme = window.localStorage.getItem('invita-plus-theme');
@@ -289,6 +291,29 @@ export default function PublicTemplateEditorPage({
     const isLight = theme === 'light';
     const htmlDocument = useMemo(() => generateHtmlDocument(editorState, template, locale, dictionary), [dictionary, editorState, locale, template]);
     const catalogHref = navigation.find((item) => item.key === 'catalog')?.href ?? '#';
+
+    useEffect(() => {
+        setPreviewHeight(760);
+    }, [htmlDocument]);
+
+    function updatePreviewHeight() {
+        const iframe = iframeRef.current;
+
+        if (!iframe?.contentWindow?.document) {
+            return;
+        }
+
+        const { body, documentElement } = iframe.contentWindow.document;
+        const nextHeight = Math.max(
+            body?.scrollHeight ?? 0,
+            body?.offsetHeight ?? 0,
+            documentElement?.scrollHeight ?? 0,
+            documentElement?.offsetHeight ?? 0,
+            760,
+        );
+
+        setPreviewHeight(nextHeight + 4);
+    }
 
     function updateField(key, value) {
         setEditorState((currentState) => ({
@@ -572,9 +597,12 @@ export default function PublicTemplateEditorPage({
                                     <span className="h-3 w-3 rounded-full bg-emerald-400" />
                                 </div>
                                 <iframe
+                                    ref={iframeRef}
                                     title={`${template.name} preview`}
                                     srcDoc={htmlDocument}
-                                    className="h-[760px] w-full bg-white"
+                                    onLoad={updatePreviewHeight}
+                                    className="w-full bg-white"
+                                    style={{ height: `${previewHeight}px` }}
                                 />
                             </div>
                         </section>
