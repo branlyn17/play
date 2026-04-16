@@ -199,8 +199,9 @@ export default function PublicCatalogPage({
 
                     <div id="templates" className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                         {filteredTemplates.map((template) => (
-                            <article
+                            <a
                                 key={template.id}
+                                href={template.href}
                                 className={`overflow-hidden rounded-[1.8rem] border transition hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(15,23,42,0.18)] ${
                                     isLight ? 'border-slate-200 bg-white/80' : 'border-white/10 bg-white/6'
                                 }`}
@@ -262,21 +263,9 @@ export default function PublicCatalogPage({
                                 </div>
 
                                 <div className="px-5 pb-5">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div>
-                                            <p className={`text-xl font-semibold ${isLight ? 'text-slate-950' : 'text-white'}`}>{template.name}</p>
-                                            <p className={`mt-2 text-sm ${isLight ? 'text-slate-500' : 'text-white/55'}`}>{template.mood}</p>
-                                        </div>
-                                        <a
-                                            href={template.href}
-                                            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                                                isLight
-                                                    ? 'bg-indigo-600 text-white hover:bg-indigo-500'
-                                                    : 'bg-indigo-500 text-white hover:bg-indigo-400'
-                                            }`}
-                                        >
-                                            {current.viewLabel}
-                                        </a>
+                                    <div>
+                                        <p className={`text-xl font-semibold ${isLight ? 'text-slate-950' : 'text-white'}`}>{template.name}</p>
+                                        <p className={`mt-2 text-sm ${isLight ? 'text-slate-500' : 'text-white/55'}`}>{template.mood}</p>
                                     </div>
 
                                     <p className={`mt-4 text-base leading-7 ${isLight ? 'text-slate-600' : 'text-white/68'}`}>
@@ -298,7 +287,7 @@ export default function PublicCatalogPage({
                                         </div>
                                     </div>
                                 </div>
-                            </article>
+                            </a>
                         ))}
                     </div>
                 </div>
