@@ -8,14 +8,6 @@ const fontLinks = {
     'Cormorant Garamond': 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap',
 };
 
-const accentPalette = {
-    sky: '#38bdf8',
-    indigo: '#6366f1',
-    cyan: '#06b6d4',
-    rose: '#f43f5e',
-    slate: '#334155',
-};
-
 function normalizeContent(content = {}) {
     return {
         header: content.header ?? {},
@@ -24,34 +16,36 @@ function normalizeContent(content = {}) {
         panels: content.panels ?? {},
         fields: content.fields ?? {},
         stats: content.stats ?? {},
+        badges: content.badges ?? {},
+        status: content.status ?? {},
+        preview: content.preview ?? {},
         tips: content.tips ?? [],
     };
 }
 
-function buildInitialState(template, locale) {
-    const defaults = template.defaultContent ?? {};
-    const savedState = template.savedState ?? {};
-    const baseHeadline = locale === 'es' ? `${template.name} para tu gran momento` : `${template.name} for your next big moment`;
-    const baseSubtitle = locale === 'es'
-        ? 'Edita cada detalle y comparte una invitacion que se sienta unica.'
-        : 'Edit every detail and share an invitation that feels unique.';
+function normalizeDictionary(dictionary = {}) {
+    return {
+        labels: {
+            hosts: dictionary.labels?.hosts ?? 'Hosts',
+            date: dictionary.labels?.date ?? 'Date',
+            time: dictionary.labels?.time ?? 'Time',
+            venue: dictionary.labels?.venue ?? 'Venue',
+        },
+    };
+}
+
+function buildInitialState(template) {
+    const defaults = {
+        ...(template.defaultContent?.content ?? {}),
+        ...(template.defaultContent?.style ?? {}),
+    };
+    const savedState = { ...(template.savedState ?? {}) };
+
+    delete savedState._meta;
 
     return {
-        eventLabel: savedState.eventLabel ?? defaults.eventLabel ?? template.categoryName,
-        headline: savedState.headline ?? defaults.headline ?? baseHeadline,
-        subheadline: savedState.subheadline ?? defaults.subheadline ?? baseSubtitle,
-        hosts: savedState.hosts ?? defaults.hosts ?? (locale === 'es' ? 'Andrea y Miguel' : 'Andrea and Michael'),
-        dateLabel: savedState.dateLabel ?? defaults.dateLabel ?? (locale === 'es' ? 'Sabado 18 de octubre, 2026' : 'Saturday, October 18, 2026'),
-        timeLabel: savedState.timeLabel ?? defaults.timeLabel ?? '07:30 PM',
-        venueLabel: savedState.venueLabel ?? defaults.venueLabel ?? (locale === 'es' ? 'Jardines del Lago, Cochabamba' : 'Lake Gardens, Santa Cruz'),
-        message: savedState.message ?? defaults.message ?? template.description ?? template.teaser ?? '',
-        closing: savedState.closing ?? defaults.closing ?? (locale === 'es' ? 'Confirma tu asistencia y comparte este momento con nosotros.' : 'Confirm your attendance and share this moment with us.'),
-        buttonLabel: savedState.buttonLabel ?? defaults.buttonLabel ?? (locale === 'es' ? 'Confirmar asistencia' : 'Confirm attendance'),
-        accentColor: savedState.accentColor ?? defaults.accentColor ?? accentPalette[template.designTokens?.accent] ?? '#6366f1',
-        backgroundColor: savedState.backgroundColor ?? defaults.backgroundColor ?? '#eef6ff',
-        surfaceColor: savedState.surfaceColor ?? defaults.surfaceColor ?? '#ffffff',
-        textColor: savedState.textColor ?? defaults.textColor ?? '#0f172a',
-        fontFamily: savedState.fontFamily ?? defaults.fontFamily ?? template.availableFonts?.[0] ?? 'Sora',
+        ...defaults,
+        ...savedState,
     };
 }
 
@@ -60,7 +54,7 @@ function getCsrfToken() {
 }
 
 function escapeHtml(value) {
-    return String(value)
+    return String(value ?? '')
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
@@ -68,27 +62,32 @@ function escapeHtml(value) {
         .replaceAll("'", '&#039;');
 }
 
-function generateHtmlDocument(state, template) {
+function formatHtmlText(value) {
+    return escapeHtml(value).replace(/\n/g, '<br />');
+}
+
+function generateHtmlDocument(state, template, locale, dictionary) {
     const fontLink = fontLinks[state.fontFamily] ?? fontLinks.Sora;
-    const safe = Object.fromEntries(Object.entries(state).map(([key, value]) => [key, escapeHtml(value)]));
     const previewGradient = template.designTokens?.catalog_background
         ?? 'linear-gradient(135deg, #eff6ff, #dbeafe, #c7d2fe)';
+    const labels = normalizeDictionary(dictionary).labels;
+    const safeTitle = escapeHtml(state.headline);
 
     return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${escapeHtml(locale)}">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${safe.headline}</title>
+    <title>${safeTitle}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="${fontLink}" rel="stylesheet">
     <style>
         :root {
-            --accent: ${safe.accentColor};
-            --background: ${safe.backgroundColor};
-            --surface: ${safe.surfaceColor};
-            --text: ${safe.textColor};
+            --accent: ${escapeHtml(state.accentColor)};
+            --background: ${escapeHtml(state.backgroundColor)};
+            --surface: ${escapeHtml(state.surfaceColor)};
+            --text: ${escapeHtml(state.textColor)};
             --font: '${escapeHtml(state.fontFamily)}', sans-serif;
             --gradient: ${previewGradient};
         }
@@ -207,36 +206,36 @@ function generateHtmlDocument(state, template) {
     <main class="frame">
         <section class="hero">
             <div class="hero-inner">
-                <span class="pill">${safe.eventLabel}</span>
-                <h1>${safe.headline}</h1>
-                <p class="subtitle">${safe.subheadline}</p>
+                <span class="pill">${escapeHtml(state.eventLabel)}</span>
+                <h1>${safeTitle}</h1>
+                <p class="subtitle">${formatHtmlText(state.subheadline)}</p>
             </div>
         </section>
         <section class="content">
             <div class="card">
-                <p class="label">Hosts</p>
-                <p class="value">${safe.hosts}</p>
+                <p class="label">${escapeHtml(labels.hosts)}</p>
+                <p class="value">${formatHtmlText(state.hosts)}</p>
             </div>
             <div class="meta">
                 <div class="card">
-                    <p class="label">Date</p>
-                    <p class="value">${safe.dateLabel}</p>
+                    <p class="label">${escapeHtml(labels.date)}</p>
+                    <p class="value">${formatHtmlText(state.dateLabel)}</p>
                 </div>
                 <div class="card">
-                    <p class="label">Time</p>
-                    <p class="value">${safe.timeLabel}</p>
+                    <p class="label">${escapeHtml(labels.time)}</p>
+                    <p class="value">${formatHtmlText(state.timeLabel)}</p>
                 </div>
                 <div class="card">
-                    <p class="label">Venue</p>
-                    <p class="value">${safe.venueLabel}</p>
+                    <p class="label">${escapeHtml(labels.venue)}</p>
+                    <p class="value">${formatHtmlText(state.venueLabel)}</p>
                 </div>
             </div>
             <div class="card">
-                <p class="message">${safe.message}</p>
+                <p class="message">${formatHtmlText(state.message)}</p>
             </div>
             <div class="footer">
-                <p class="message" style="max-width: 560px;">${safe.closing}</p>
-                <a class="cta" href="#">${safe.buttonLabel}</a>
+                <p class="message" style="max-width: 560px;">${formatHtmlText(state.closing)}</p>
+                <a class="cta" href="#">${escapeHtml(state.buttonLabel)}</a>
             </div>
         </section>
     </main>
@@ -257,7 +256,10 @@ export default function PublicTemplateEditorPage({
 }) {
     const [theme, setTheme] = useState('dark');
     const current = useMemo(() => normalizeContent(content), [content]);
-    const initialState = useMemo(() => buildInitialState(template, locale), [template, locale]);
+    const dictionary = useMemo(() => normalizeDictionary(template.dictionary), [template.dictionary]);
+    const contentFields = useMemo(() => (template.editorFields ?? []).filter((field) => field.group === 'content'), [template.editorFields]);
+    const styleFields = useMemo(() => (template.editorFields ?? []).filter((field) => field.group === 'style'), [template.editorFields]);
+    const initialState = useMemo(() => buildInitialState(template), [template]);
     const [editorState, setEditorState] = useState(initialState);
     const [downloadCount, setDownloadCount] = useState(template.downloadCount);
     const [isSaving, setIsSaving] = useState(false);
@@ -285,7 +287,7 @@ export default function PublicTemplateEditorPage({
     }, [template.downloadCount]);
 
     const isLight = theme === 'light';
-    const htmlDocument = useMemo(() => generateHtmlDocument(editorState, template), [editorState, template]);
+    const htmlDocument = useMemo(() => generateHtmlDocument(editorState, template, locale, dictionary), [dictionary, editorState, locale, template]);
     const catalogHref = navigation.find((item) => item.key === 'catalog')?.href ?? '#';
 
     function updateField(key, value) {
@@ -329,11 +331,11 @@ export default function PublicTemplateEditorPage({
                 setDownloadCount(payload.download_count);
             }
 
-            setStatusMessage(downloaded ? 'Draft saved and HTML downloaded.' : 'Draft saved.');
+            setStatusMessage(downloaded ? current.status.downloaded : current.status.saved);
 
             return payload;
         } catch (error) {
-            setStatusMessage('We could not save the draft this time.');
+            setStatusMessage(current.status.save_failed);
             return null;
         } finally {
             setIsSaving(false);
@@ -341,7 +343,11 @@ export default function PublicTemplateEditorPage({
     }
 
     async function downloadHtml() {
-        await persistInvitation(true);
+        const payload = await persistInvitation(true);
+
+        if (!payload) {
+            return;
+        }
 
         const blob = new Blob([htmlDocument], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
@@ -403,7 +409,7 @@ export default function PublicTemplateEditorPage({
                                     <p className={`mt-3 text-base leading-7 ${isLight ? 'text-slate-600' : 'text-white/68'}`}>{template.teaser ?? template.description}</p>
                                 </div>
                                 <div className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] ${template.isPremium ? 'bg-indigo-600 text-white' : isLight ? 'bg-slate-100 text-slate-700' : 'bg-white/10 text-white/80'}`}>
-                                    {template.isPremium ? 'Premium' : 'Base'}
+                                    {template.isPremium ? current.badges.premium : current.badges.base}
                                 </div>
                             </div>
                             <div className={`mt-5 grid grid-cols-3 gap-2 rounded-[1.2rem] border px-3 py-3 text-center text-xs ${isLight ? 'border-slate-200 bg-slate-50 text-slate-600' : 'border-white/10 bg-slate-900/35 text-white/70'}`}>
@@ -438,69 +444,68 @@ export default function PublicTemplateEditorPage({
                                 </div>
 
                                 <div className="mt-5 space-y-4">
-                                    {[
-                                        ['eventLabel', current.fields.event_label],
-                                        ['headline', current.fields.headline],
-                                        ['subheadline', current.fields.subheadline],
-                                        ['hosts', current.fields.hosts],
-                                        ['dateLabel', current.fields.date_label],
-                                        ['timeLabel', current.fields.time_label],
-                                        ['venueLabel', current.fields.venue_label],
-                                        ['message', current.fields.message],
-                                        ['closing', current.fields.closing],
-                                        ['buttonLabel', current.fields.button_label],
-                                    ].map(([key, label]) => (
-                                        <label key={key} className="block">
-                                            <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{label}</span>
-                                            {key === 'message' || key === 'closing' || key === 'subheadline' ? (
-                                                <textarea
-                                                    value={editorState[key]}
-                                                    onChange={(event) => updateField(key, event.target.value)}
-                                                    rows={key === 'message' ? 4 : 3}
-                                                    className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${isLight ? 'border-slate-200 bg-slate-50 text-slate-900 focus:border-sky-400' : 'border-white/10 bg-slate-900/45 text-white focus:border-sky-400'}`}
-                                                />
-                                            ) : (
-                                                <input
-                                                    value={editorState[key]}
-                                                    onChange={(event) => updateField(key, event.target.value)}
-                                                    className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${isLight ? 'border-slate-200 bg-slate-50 text-slate-900 focus:border-sky-400' : 'border-white/10 bg-slate-900/45 text-white focus:border-sky-400'}`}
-                                                />
-                                            )}
-                                        </label>
-                                    ))}
+                                    {contentFields.map((field) => {
+                                        const label = current.fields[field.label_key] ?? field.key;
+                                        const value = editorState[field.key] ?? '';
+                                        const sharedClass = `w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${isLight ? 'border-slate-200 bg-slate-50 text-slate-900 focus:border-sky-400' : 'border-white/10 bg-slate-900/45 text-white focus:border-sky-400'}`;
+
+                                        return (
+                                            <label key={field.key} className="block">
+                                                <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{label}</span>
+                                                {field.multiline ? (
+                                                    <textarea
+                                                        value={value}
+                                                        onChange={(event) => updateField(field.key, event.target.value)}
+                                                        rows={field.key === 'message' ? 4 : 3}
+                                                        className={sharedClass}
+                                                    />
+                                                ) : (
+                                                    <input
+                                                        value={value}
+                                                        onChange={(event) => updateField(field.key, event.target.value)}
+                                                        className={sharedClass}
+                                                    />
+                                                )}
+                                            </label>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
                             <div className={`rounded-[2rem] border p-5 ${isLight ? 'border-slate-200 bg-white/80' : 'border-white/10 bg-white/6'}`}>
                                 <h3 className={`text-lg font-semibold ${isLight ? 'text-slate-950' : 'text-white'}`}>{current.panels.style}</h3>
                                 <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
-                                    {[
-                                        ['accentColor', current.fields.accent_color],
-                                        ['backgroundColor', current.fields.background_color],
-                                        ['surfaceColor', current.fields.surface_color],
-                                        ['textColor', current.fields.text_color],
-                                    ].map(([key, label]) => (
-                                        <label key={key} className="block">
-                                            <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{label}</span>
-                                            <div className={`flex items-center gap-3 rounded-2xl border px-3 py-2 ${isLight ? 'border-slate-200 bg-slate-50' : 'border-white/10 bg-slate-900/45'}`}>
-                                                <input type="color" value={editorState[key]} onChange={(event) => updateField(key, event.target.value)} className="h-10 w-12 rounded-xl border-0 bg-transparent" />
-                                                <input value={editorState[key]} onChange={(event) => updateField(key, event.target.value)} className={`w-full bg-transparent text-sm outline-none ${isLight ? 'text-slate-900' : 'text-white'}`} />
-                                            </div>
-                                        </label>
-                                    ))}
+                                    {styleFields.map((field) => {
+                                        const label = current.fields[field.label_key] ?? field.key;
+                                        const value = editorState[field.key] ?? '';
 
-                                    <label className="block sm:col-span-2 xl:col-span-1">
-                                        <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{current.fields.font_family}</span>
-                                        <select
-                                            value={editorState.fontFamily}
-                                            onChange={(event) => updateField('fontFamily', event.target.value)}
-                                            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${isLight ? 'border-slate-200 bg-slate-50 text-slate-900 focus:border-sky-400' : 'border-white/10 bg-slate-900/45 text-white focus:border-sky-400'}`}
-                                        >
-                                            {template.availableFonts.map((font) => (
-                                                <option key={font} value={font}>{font}</option>
-                                            ))}
-                                        </select>
-                                    </label>
+                                        if (field.type === 'select') {
+                                            return (
+                                                <label key={field.key} className="block sm:col-span-2 xl:col-span-1">
+                                                    <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{label}</span>
+                                                    <select
+                                                        value={value}
+                                                        onChange={(event) => updateField(field.key, event.target.value)}
+                                                        className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${isLight ? 'border-slate-200 bg-slate-50 text-slate-900 focus:border-sky-400' : 'border-white/10 bg-slate-900/45 text-white focus:border-sky-400'}`}
+                                                    >
+                                                        {template.availableFonts.map((font) => (
+                                                            <option key={font} value={font}>{font}</option>
+                                                        ))}
+                                                    </select>
+                                                </label>
+                                            );
+                                        }
+
+                                        return (
+                                            <label key={field.key} className="block">
+                                                <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{label}</span>
+                                                <div className={`flex items-center gap-3 rounded-2xl border px-3 py-2 ${isLight ? 'border-slate-200 bg-slate-50' : 'border-white/10 bg-slate-900/45'}`}>
+                                                    <input type="color" value={value} onChange={(event) => updateField(field.key, event.target.value)} className="h-10 w-12 rounded-xl border-0 bg-transparent" />
+                                                    <input value={value} onChange={(event) => updateField(field.key, event.target.value)} className={`w-full bg-transparent text-sm outline-none ${isLight ? 'text-slate-900' : 'text-white'}`} />
+                                                </div>
+                                            </label>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
@@ -523,7 +528,7 @@ export default function PublicTemplateEditorPage({
                                     <p className={`mt-2 text-sm ${isLight ? 'text-slate-500' : 'text-white/55'}`}>{template.description}</p>
                                     {invitation?.editToken ? (
                                         <p className={`mt-2 text-xs uppercase tracking-[0.18em] ${isLight ? 'text-slate-400' : 'text-white/35'}`}>
-                                            Edit token: {invitation.editToken}
+                                            {current.preview.edit_token}: {invitation.editToken}
                                         </p>
                                     ) : null}
                                 </div>
@@ -535,13 +540,21 @@ export default function PublicTemplateEditorPage({
                                         {current.actions.open_catalog}
                                     </a>
                                     <button
+                                        type="button"
+                                        onClick={() => persistInvitation(false)}
+                                        disabled={isSaving}
+                                        className={`rounded-2xl border px-5 py-3 text-sm font-semibold transition ${isLight ? 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200' : 'border-white/10 bg-white/8 text-white hover:bg-white/12'}`}
+                                    >
+                                        {current.actions.save}
+                                    </button>
+                                    <button
                                         id="editor-download"
                                         type="button"
                                         onClick={downloadHtml}
                                         disabled={isSaving}
                                         className={`rounded-2xl px-5 py-3 text-sm font-semibold transition ${isLight ? 'bg-indigo-600 text-white shadow-[0_18px_34px_rgba(79,70,229,0.22)] hover:bg-indigo-500' : 'bg-indigo-500 text-white shadow-[0_18px_34px_rgba(99,102,241,0.22)] hover:bg-indigo-400'}`}
                                     >
-                                        {isSaving ? 'Saving...' : current.actions.download}
+                                        {isSaving ? current.status.saving : current.actions.download}
                                     </button>
                                 </div>
                             </div>

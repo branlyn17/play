@@ -142,6 +142,7 @@ return [
         ],
         'actions' => [
             'download' => 'Descargar HTML',
+            'save' => 'Guardar borrador',
             'reset' => 'Restablecer',
             'open_catalog' => 'Volver al catalogo',
         ],
@@ -172,6 +173,19 @@ return [
             'views' => 'vistas',
             'downloads' => 'descargas',
             'uses' => 'usos',
+        ],
+        'badges' => [
+            'premium' => 'Premium',
+            'base' => 'Base',
+        ],
+        'status' => [
+            'saving' => 'Guardando...',
+            'saved' => 'Borrador guardado.',
+            'downloaded' => 'Borrador guardado y HTML descargado.',
+            'save_failed' => 'No se pudo guardar el borrador en este momento.',
+        ],
+        'preview' => [
+            'edit_token' => 'Token de edicion',
         ],
         'tips' => [
             'El archivo descargado se puede abrir directamente en el navegador del celular.',

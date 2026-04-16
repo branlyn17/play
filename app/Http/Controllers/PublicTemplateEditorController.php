@@ -22,10 +22,11 @@ class PublicTemplateEditorController extends Controller
 
             abort_unless($invitation && $invitation->template, 404);
 
-            $canonicalSlug = $invitation->template->translations->firstWhere('locale', $locale)?->slug;
+            $invitationLocale = $invitation->locale ?: $locale;
+            $canonicalSlug = $invitation->template->translations->firstWhere('locale', $invitationLocale)?->slug;
 
-            if ($canonicalSlug && $canonicalSlug !== $slug) {
-                return redirect()->route(PublicPage::routeName('catalog.show', $locale), [
+            if ($invitationLocale !== $locale || ($canonicalSlug && $canonicalSlug !== $slug)) {
+                return redirect()->route(PublicPage::routeName('catalog.show', $invitationLocale), [
                     'slug' => $canonicalSlug,
                     'edit' => $invitation->edit_token,
                 ]);

@@ -5,7 +5,6 @@ namespace App\Support\Catalog;
 use App\Models\Event;
 use App\Models\Invitation;
 use App\Models\Template;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -17,10 +16,13 @@ class InvitationDraftService
     {
         $fallbackLocale = config('locales.fallback', 'en');
         $translation = self::resolveTranslation($template->translations, $locale, $fallbackLocale);
-        $title = $translation?->name ?? $template->code;
-        $description = $translation?->teaser ?? $translation?->description;
+        $blueprint = TemplateEditorBlueprint::resolve($template, $locale);
+        $initialEditorState = TemplateEditorBlueprint::defaultEditorState($template, $locale);
+        $title = $initialEditorState['headline'] ?? $translation?->name ?? $template->code;
+        $description = $initialEditorState['subheadline'] ?? $translation?->teaser ?? $translation?->description;
+        $parts = TemplateEditorBlueprint::splitEditorState($template, $initialEditorState);
 
-        return DB::transaction(function () use ($template, $locale, $title, $description) {
+        return DB::transaction(function () use ($template, $locale, $title, $description, $initialEditorState, $parts, $blueprint) {
             $event = Event::create([
                 'title' => $title,
                 'description' => $description,
@@ -38,9 +40,14 @@ class InvitationDraftService
                 'edit_token' => (string) Str::uuid(),
                 'public_token' => (string) Str::uuid(),
                 'status' => 'draft',
-                'editor_state' => $template->default_content ?? [],
-                'customization_data' => $template->default_content ?? [],
-                'style_overrides' => $template->design_tokens ?? [],
+                'editor_state' => array_merge($initialEditorState, [
+                    '_meta' => [
+                        'locale' => $locale,
+                        'resolved_locale' => $blueprint['resolvedLocale'],
+                    ],
+                ]),
+                'customization_data' => $parts['content'],
+                'style_overrides' => $parts['style'],
             ]);
 
             $template->increment('use_count');
@@ -51,15 +58,9 @@ class InvitationDraftService
 
     public static function persistEditorState(Invitation $invitation, array $editorState, string $htmlDocument, bool $downloaded = false): Invitation
     {
-        $styleOverrides = Arr::only($editorState, [
-            'accentColor',
-            'backgroundColor',
-            'surfaceColor',
-            'textColor',
-            'fontFamily',
-        ]);
-
-        $customizationData = Arr::except($editorState, array_keys($styleOverrides));
+        $parts = TemplateEditorBlueprint::splitEditorState($invitation->template, $editorState);
+        $styleOverrides = $parts['style'];
+        $customizationData = $parts['content'];
         $path = 'invitations/'.$invitation->edit_token.'.html';
 
         Storage::disk('public')->put($path, $htmlDocument);
@@ -69,7 +70,11 @@ class InvitationDraftService
             'description' => $editorState['subheadline'] ?? $invitation->description,
             'customization_data' => $customizationData,
             'style_overrides' => $styleOverrides,
-            'editor_state' => $editorState,
+            'editor_state' => array_merge($editorState, [
+                '_meta' => [
+                    'locale' => $invitation->locale,
+                ],
+            ]),
             'rendered_html_path' => $path,
             'rendered_html_checksum' => hash('sha256', $htmlDocument),
         ]);

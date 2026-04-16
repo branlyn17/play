@@ -142,6 +142,7 @@ return [
         ],
         'actions' => [
             'download' => 'Download HTML',
+            'save' => 'Save draft',
             'reset' => 'Reset',
             'open_catalog' => 'Back to catalog',
         ],
@@ -172,6 +173,19 @@ return [
             'views' => 'views',
             'downloads' => 'downloads',
             'uses' => 'uses',
+        ],
+        'badges' => [
+            'premium' => 'Premium',
+            'base' => 'Base',
+        ],
+        'status' => [
+            'saving' => 'Saving...',
+            'saved' => 'Draft saved.',
+            'downloaded' => 'Draft saved and HTML downloaded.',
+            'save_failed' => 'We could not save the draft this time.',
+        ],
+        'preview' => [
+            'edit_token' => 'Edit token',
         ],
         'tips' => [
             'The downloaded file can be opened directly in your phone browser.',

@@ -27,6 +27,61 @@ class TemplateSeeder extends Seeder
                     'accent' => 'sky',
                     'catalog_background' => 'linear-gradient(160deg, rgba(255,255,255,0.15), rgba(255,255,255,0.03)), radial-gradient(circle at top left, rgba(191,219,254,0.55), transparent 32%), radial-gradient(circle at bottom right, rgba(129,140,248,0.28), transparent 30%), linear-gradient(135deg, #eff6ff, #dbeafe, #c7d2fe)',
                 ],
+                'defaults' => [
+                    'style' => [
+                        'accentColor' => '#38bdf8',
+                        'backgroundColor' => '#eef6ff',
+                        'surfaceColor' => '#ffffff',
+                        'textColor' => '#0f172a',
+                        'fontFamily' => 'Cormorant Garamond',
+                    ],
+                    'locales' => [
+                        'es' => [
+                            'content' => [
+                                'eventLabel' => 'Boda elegante',
+                                'headline' => 'Aura para una celebracion inolvidable',
+                                'subheadline' => 'Personaliza una invitacion delicada, romantica y lista para compartir.',
+                                'hosts' => 'Valeria y Daniel',
+                                'dateLabel' => 'Sabado 18 de octubre de 2026',
+                                'timeLabel' => '07:30 PM',
+                                'venueLabel' => 'Jardines del Lago, Cochabamba',
+                                'message' => 'Acompananos en una noche especial llena de musica, detalles suaves y una experiencia pensada para emocionar.',
+                                'closing' => 'Confirma tu asistencia y guarda esta fecha para celebrar con nosotros.',
+                                'buttonLabel' => 'Confirmar asistencia',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Anfitriones',
+                                    'date' => 'Fecha',
+                                    'time' => 'Hora',
+                                    'venue' => 'Lugar',
+                                ],
+                            ],
+                        ],
+                        'en' => [
+                            'content' => [
+                                'eventLabel' => 'Elegant wedding',
+                                'headline' => 'Aura for an unforgettable celebration',
+                                'subheadline' => 'Customize a delicate, romantic invitation that is ready to share.',
+                                'hosts' => 'Valeria and Daniel',
+                                'dateLabel' => 'Saturday, October 18, 2026',
+                                'timeLabel' => '07:30 PM',
+                                'venueLabel' => 'Lake Gardens, Cochabamba',
+                                'message' => 'Join us for a special evening shaped by music, soft details and a refined atmosphere.',
+                                'closing' => 'Confirm your attendance and save the date to celebrate with us.',
+                                'buttonLabel' => 'Confirm attendance',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Hosts',
+                                    'date' => 'Date',
+                                    'time' => 'Time',
+                                    'venue' => 'Venue',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
                 'translations' => [
                     'es' => ['name' => 'Aura', 'slug' => 'aura', 'teaser' => 'Elegancia suave en azul claro.', 'description' => 'Una plantilla refinada para bodas con tipografia limpia, secciones romanticas y una presencia luminosa.'],
                     'en' => ['name' => 'Aura', 'slug' => 'aura', 'teaser' => 'Soft elegance in light blue.', 'description' => 'A refined wedding template with clean typography, romantic sections and a luminous presence.'],
@@ -44,6 +99,61 @@ class TemplateSeeder extends Seeder
                 'design_tokens' => [
                     'accent' => 'indigo',
                     'catalog_background' => 'linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)), radial-gradient(circle at top right, rgba(96,165,250,0.24), transparent 28%), radial-gradient(circle at bottom left, rgba(244,114,182,0.18), transparent 24%), linear-gradient(135deg, #1e1b4b, #172554, #0f172a)',
+                ],
+                'defaults' => [
+                    'style' => [
+                        'accentColor' => '#6366f1',
+                        'backgroundColor' => '#e0e7ff',
+                        'surfaceColor' => '#ffffff',
+                        'textColor' => '#1f2937',
+                        'fontFamily' => 'Manrope',
+                    ],
+                    'locales' => [
+                        'es' => [
+                            'content' => [
+                                'eventLabel' => 'XV de gala',
+                                'headline' => 'Luna para una noche que todos recordaran',
+                                'subheadline' => 'Un estilo brillante para celebrar tus quince con energia, color y personalidad.',
+                                'hosts' => 'Familia Torres',
+                                'dateLabel' => 'Sabado 12 de septiembre de 2026',
+                                'timeLabel' => '08:00 PM',
+                                'venueLabel' => 'Salon Aurora, Santa Cruz',
+                                'message' => 'Te esperamos para vivir una velada llena de luces, baile y momentos inolvidables.',
+                                'closing' => 'Reserva tu lugar y preparate para una noche espectacular.',
+                                'buttonLabel' => 'Reservar lugar',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Anfitriones',
+                                    'date' => 'Fecha',
+                                    'time' => 'Hora',
+                                    'venue' => 'Lugar',
+                                ],
+                            ],
+                        ],
+                        'en' => [
+                            'content' => [
+                                'eventLabel' => 'Sweet fifteen gala',
+                                'headline' => 'Luna for a night everyone will remember',
+                                'subheadline' => 'A glowing style to celebrate your sweet fifteen with energy, color and personality.',
+                                'hosts' => 'Torres Family',
+                                'dateLabel' => 'Saturday, September 12, 2026',
+                                'timeLabel' => '08:00 PM',
+                                'venueLabel' => 'Aurora Hall, Santa Cruz',
+                                'message' => 'Join us for a night of lights, dancing and unforgettable moments.',
+                                'closing' => 'Save your seat and get ready for a spectacular evening.',
+                                'buttonLabel' => 'Reserve your seat',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Hosts',
+                                    'date' => 'Date',
+                                    'time' => 'Time',
+                                    'venue' => 'Venue',
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
                 'translations' => [
                     'es' => ['name' => 'Luna', 'slug' => 'luna', 'teaser' => 'Brillo nocturno para unos XV inolvidables.', 'description' => 'Escena premium con contraste fuerte, ideal para celebraciones glamorosas y llenas de energia.'],
@@ -63,6 +173,61 @@ class TemplateSeeder extends Seeder
                     'accent' => 'cyan',
                     'catalog_background' => 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)), radial-gradient(circle at top left, rgba(224,242,254,0.8), transparent 34%), radial-gradient(circle at bottom right, rgba(147,197,253,0.26), transparent 26%), linear-gradient(135deg, #ffffff, #eff6ff, #dbeafe)',
                 ],
+                'defaults' => [
+                    'style' => [
+                        'accentColor' => '#06b6d4',
+                        'backgroundColor' => '#f0f9ff',
+                        'surfaceColor' => '#ffffff',
+                        'textColor' => '#0f172a',
+                        'fontFamily' => 'Sora',
+                    ],
+                    'locales' => [
+                        'es' => [
+                            'content' => [
+                                'eventLabel' => 'Cumpleanos',
+                                'headline' => 'Brisa para celebrar a tu manera',
+                                'subheadline' => 'Una invitacion ligera y alegre para reuniones familiares o fiestas llenas de color.',
+                                'hosts' => 'Camila celebra',
+                                'dateLabel' => 'Viernes 24 de julio de 2026',
+                                'timeLabel' => '06:00 PM',
+                                'venueLabel' => 'Terraza Central, La Paz',
+                                'message' => 'Trae tu mejor energia y acompananos a compartir musica, comida y momentos inolvidables.',
+                                'closing' => 'Confirma tu asistencia y celebra con nosotros.',
+                                'buttonLabel' => 'Quiero asistir',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Organiza',
+                                    'date' => 'Fecha',
+                                    'time' => 'Hora',
+                                    'venue' => 'Lugar',
+                                ],
+                            ],
+                        ],
+                        'en' => [
+                            'content' => [
+                                'eventLabel' => 'Birthday',
+                                'headline' => 'Brisa to celebrate your way',
+                                'subheadline' => 'A light and joyful invitation for family gatherings or color-filled parties.',
+                                'hosts' => 'Camila celebrates',
+                                'dateLabel' => 'Friday, July 24, 2026',
+                                'timeLabel' => '06:00 PM',
+                                'venueLabel' => 'Central Terrace, La Paz',
+                                'message' => 'Bring your best energy and join us for music, food and unforgettable moments.',
+                                'closing' => 'Confirm your attendance and celebrate with us.',
+                                'buttonLabel' => 'I want to attend',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Hosted by',
+                                    'date' => 'Date',
+                                    'time' => 'Time',
+                                    'venue' => 'Venue',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
                 'translations' => [
                     'es' => ['name' => 'Brisa', 'slug' => 'brisa', 'teaser' => 'Frescura visual para celebrar a cualquier edad.', 'description' => 'Una plantilla ligera, alegre y muy adaptable para fiestas familiares, juveniles o tematicas.'],
                     'en' => ['name' => 'Brisa', 'slug' => 'brisa', 'teaser' => 'A fresh visual tone for celebrations at any age.', 'description' => 'A light, joyful and highly adaptable template for family, youth or themed birthday parties.'],
@@ -80,6 +245,61 @@ class TemplateSeeder extends Seeder
                 'design_tokens' => [
                     'accent' => 'rose',
                     'catalog_background' => 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)), radial-gradient(circle at top left, rgba(251,207,232,0.55), transparent 32%), radial-gradient(circle at bottom right, rgba(191,219,254,0.26), transparent 28%), linear-gradient(135deg, #fff1f2, #fdf2f8, #eff6ff)',
+                ],
+                'defaults' => [
+                    'style' => [
+                        'accentColor' => '#f43f5e',
+                        'backgroundColor' => '#fff1f2',
+                        'surfaceColor' => '#ffffff',
+                        'textColor' => '#1f2937',
+                        'fontFamily' => 'Manrope',
+                    ],
+                    'locales' => [
+                        'es' => [
+                            'content' => [
+                                'eventLabel' => 'Baby shower',
+                                'headline' => 'Nido para recibir una nueva historia',
+                                'subheadline' => 'Una invitacion suave y moderna para compartir la alegria de una nueva llegada.',
+                                'hosts' => 'Familia Mendoza',
+                                'dateLabel' => 'Domingo 15 de noviembre de 2026',
+                                'timeLabel' => '04:30 PM',
+                                'venueLabel' => 'Casa Jardin, Sucre',
+                                'message' => 'Celebremos juntos esta nueva etapa con detalles tiernos, juegos y una tarde especial.',
+                                'closing' => 'Confirma tu asistencia y acompananos en este momento tan esperado.',
+                                'buttonLabel' => 'Confirmar presencia',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Organiza',
+                                    'date' => 'Fecha',
+                                    'time' => 'Hora',
+                                    'venue' => 'Lugar',
+                                ],
+                            ],
+                        ],
+                        'en' => [
+                            'content' => [
+                                'eventLabel' => 'Baby shower',
+                                'headline' => 'Nest to welcome a new story',
+                                'subheadline' => 'A soft, modern invitation to share the joy of a new arrival.',
+                                'hosts' => 'Mendoza Family',
+                                'dateLabel' => 'Sunday, November 15, 2026',
+                                'timeLabel' => '04:30 PM',
+                                'venueLabel' => 'Garden House, Sucre',
+                                'message' => 'Let us celebrate this new chapter with gentle details, games and a special afternoon.',
+                                'closing' => 'Confirm your attendance and join us for this long-awaited moment.',
+                                'buttonLabel' => 'Confirm presence',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Hosted by',
+                                    'date' => 'Date',
+                                    'time' => 'Time',
+                                    'venue' => 'Venue',
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
                 'translations' => [
                     'es' => ['name' => 'Nido', 'slug' => 'nido', 'teaser' => 'Dulzura moderna para un baby shower memorable.', 'description' => 'Colores amables, composicion limpia y bloques flexibles para celebrar una nueva llegada con estilo.'],
@@ -99,6 +319,61 @@ class TemplateSeeder extends Seeder
                     'accent' => 'sky',
                     'catalog_background' => 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03)), radial-gradient(circle at top, rgba(186,230,253,0.5), transparent 30%), radial-gradient(circle at bottom right, rgba(125,211,252,0.22), transparent 24%), linear-gradient(135deg, #f0f9ff, #dbeafe, #e0e7ff)',
                 ],
+                'defaults' => [
+                    'style' => [
+                        'accentColor' => '#38bdf8',
+                        'backgroundColor' => '#f0f9ff',
+                        'surfaceColor' => '#ffffff',
+                        'textColor' => '#0f172a',
+                        'fontFamily' => 'Cormorant Garamond',
+                    ],
+                    'locales' => [
+                        'es' => [
+                            'content' => [
+                                'eventLabel' => 'Bautizo',
+                                'headline' => 'Cielo para una ceremonia serena',
+                                'subheadline' => 'Un diseno luminoso y delicado para celebrar un momento intimo en familia.',
+                                'hosts' => 'Familia Alvarez',
+                                'dateLabel' => 'Domingo 06 de diciembre de 2026',
+                                'timeLabel' => '11:00 AM',
+                                'venueLabel' => 'Capilla San Rafael, Tarija',
+                                'message' => 'Nos encantara compartir contigo una ceremonia especial y un almuerzo de celebracion.',
+                                'closing' => 'Agradecemos tu presencia en este dia tan importante para nuestra familia.',
+                                'buttonLabel' => 'Ver ubicacion',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Familia',
+                                    'date' => 'Fecha',
+                                    'time' => 'Hora',
+                                    'venue' => 'Lugar',
+                                ],
+                            ],
+                        ],
+                        'en' => [
+                            'content' => [
+                                'eventLabel' => 'Baptism',
+                                'headline' => 'Sky Grace for a serene ceremony',
+                                'subheadline' => 'A bright and delicate design to celebrate an intimate family moment.',
+                                'hosts' => 'Alvarez Family',
+                                'dateLabel' => 'Sunday, December 6, 2026',
+                                'timeLabel' => '11:00 AM',
+                                'venueLabel' => 'San Rafael Chapel, Tarija',
+                                'message' => 'We would love to share this special ceremony and a celebration lunch with you.',
+                                'closing' => 'Thank you for joining us on this meaningful day for our family.',
+                                'buttonLabel' => 'View location',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Family',
+                                    'date' => 'Date',
+                                    'time' => 'Time',
+                                    'venue' => 'Venue',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
                 'translations' => [
                     'es' => ['name' => 'Cielo', 'slug' => 'cielo', 'teaser' => 'Un tono sereno para bautizos y encuentros familiares.', 'description' => 'Plantilla delicada y luminosa pensada para ceremonias intimas, con un lenguaje visual sobrio y elegante.'],
                     'en' => ['name' => 'Sky Grace', 'slug' => 'sky-grace', 'teaser' => 'A serene tone for baptisms and family gatherings.', 'description' => 'Delicate and bright template built for intimate ceremonies, with a sober and elegant visual language.'],
@@ -116,6 +391,61 @@ class TemplateSeeder extends Seeder
                 'design_tokens' => [
                     'accent' => 'slate',
                     'catalog_background' => 'linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)), radial-gradient(circle at top right, rgba(96,165,250,0.18), transparent 28%), radial-gradient(circle at bottom left, rgba(59,130,246,0.16), transparent 22%), linear-gradient(135deg, #020617, #0f172a, #1e293b)',
+                ],
+                'defaults' => [
+                    'style' => [
+                        'accentColor' => '#334155',
+                        'backgroundColor' => '#e2e8f0',
+                        'surfaceColor' => '#ffffff',
+                        'textColor' => '#0f172a',
+                        'fontFamily' => 'Sora',
+                    ],
+                    'locales' => [
+                        'es' => [
+                            'content' => [
+                                'eventLabel' => 'Evento corporativo',
+                                'headline' => 'Pulse para experiencias de marca con impacto',
+                                'subheadline' => 'Una invitacion moderna para lanzamientos, networking y eventos profesionales.',
+                                'hosts' => 'Equipo Invita Plus',
+                                'dateLabel' => 'Jueves 20 de agosto de 2026',
+                                'timeLabel' => '07:00 PM',
+                                'venueLabel' => 'Centro Empresarial Norte, Santa Cruz',
+                                'message' => 'Acompananos a una noche de conexiones, contenido de valor y una experiencia disenada para impresionar.',
+                                'closing' => 'Confirma tu asistencia para reservar tu acceso a esta experiencia.',
+                                'buttonLabel' => 'Confirmar acceso',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Organiza',
+                                    'date' => 'Fecha',
+                                    'time' => 'Hora',
+                                    'venue' => 'Lugar',
+                                ],
+                            ],
+                        ],
+                        'en' => [
+                            'content' => [
+                                'eventLabel' => 'Corporate event',
+                                'headline' => 'Pulse for branded experiences with impact',
+                                'subheadline' => 'A modern invitation for launches, networking and professional events.',
+                                'hosts' => 'Invita Plus Team',
+                                'dateLabel' => 'Thursday, August 20, 2026',
+                                'timeLabel' => '07:00 PM',
+                                'venueLabel' => 'North Business Center, Santa Cruz',
+                                'message' => 'Join us for an evening of connections, valuable content and a carefully crafted branded experience.',
+                                'closing' => 'Confirm your attendance to reserve your access to this experience.',
+                                'buttonLabel' => 'Confirm access',
+                            ],
+                            'dictionary' => [
+                                'labels' => [
+                                    'hosts' => 'Hosted by',
+                                    'date' => 'Date',
+                                    'time' => 'Time',
+                                    'venue' => 'Venue',
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
                 'translations' => [
                     'es' => ['name' => 'Pulse', 'slug' => 'pulse', 'teaser' => 'Formato premium para experiencias corporativas y de marca.', 'description' => 'Pensada para lanzamientos, networking y eventos profesionales con un acabado moderno y de alto impacto.'],
@@ -135,12 +465,12 @@ class TemplateSeeder extends Seeder
                     'source_html_path' => "templates/{$data['code']}/index.html",
                     'source_css_path' => "templates/{$data['code']}/style.css",
                     'source_js_path' => null,
-                    'editor_schema' => [
-                        'sections' => ['hero', 'event', 'countdown', 'gallery', 'rsvp'],
-                        'supports' => ['colors', 'fonts', 'spacing', 'backgrounds'],
-                    ],
+                    'editor_schema' => $this->editorSchema(),
                     'default_content' => [
-                        'sections' => ['hero', 'event', 'countdown', 'gallery', 'rsvp'],
+                        'shared' => [
+                            'style' => $data['defaults']['style'],
+                        ],
+                        'locales' => $data['defaults']['locales'],
                     ],
                     'design_tokens' => $data['design_tokens'],
                     'available_fonts' => ['Sora', 'Manrope', 'Cormorant Garamond'],
@@ -166,5 +496,31 @@ class TemplateSeeder extends Seeder
                 );
             }
         }
+    }
+
+    protected function editorSchema(): array
+    {
+        return [
+            'version' => 1,
+            'sections' => ['hero', 'event', 'countdown', 'gallery', 'rsvp'],
+            'supports' => ['colors', 'fonts', 'spacing', 'backgrounds'],
+            'fields' => [
+                ['key' => 'eventLabel', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'event_label'],
+                ['key' => 'headline', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'headline'],
+                ['key' => 'subheadline', 'group' => 'content', 'type' => 'textarea', 'multiline' => true, 'translatable' => true, 'label_key' => 'subheadline'],
+                ['key' => 'hosts', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'hosts'],
+                ['key' => 'dateLabel', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'date_label'],
+                ['key' => 'timeLabel', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'time_label'],
+                ['key' => 'venueLabel', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'venue_label'],
+                ['key' => 'message', 'group' => 'content', 'type' => 'textarea', 'multiline' => true, 'translatable' => true, 'label_key' => 'message'],
+                ['key' => 'closing', 'group' => 'content', 'type' => 'textarea', 'multiline' => true, 'translatable' => true, 'label_key' => 'closing'],
+                ['key' => 'buttonLabel', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'button_label'],
+                ['key' => 'accentColor', 'group' => 'style', 'type' => 'color', 'translatable' => false, 'label_key' => 'accent_color'],
+                ['key' => 'backgroundColor', 'group' => 'style', 'type' => 'color', 'translatable' => false, 'label_key' => 'background_color'],
+                ['key' => 'surfaceColor', 'group' => 'style', 'type' => 'color', 'translatable' => false, 'label_key' => 'surface_color'],
+                ['key' => 'textColor', 'group' => 'style', 'type' => 'color', 'translatable' => false, 'label_key' => 'text_color'],
+                ['key' => 'fontFamily', 'group' => 'style', 'type' => 'select', 'translatable' => false, 'label_key' => 'font_family'],
+            ],
+        ];
     }
 }

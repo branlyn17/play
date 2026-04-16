@@ -60,9 +60,9 @@ class PublicTemplateEditorData
         $categoryTranslation = $template->category
             ? self::resolveTranslation($template->category->translations, $locale, $fallbackLocale)
             : null;
+        $blueprint = TemplateEditorBlueprint::resolve($template, $locale);
 
         $designTokens = $template->design_tokens ?? [];
-        $defaultContent = $template->default_content ?? [];
 
         return [
             'template' => [
@@ -80,8 +80,14 @@ class PublicTemplateEditorData
                 'designTokens' => $designTokens,
                 'availableFonts' => $template->available_fonts ?? [],
                 'availableColors' => $template->available_colors ?? [],
-                'editorSchema' => $template->editor_schema ?? [],
-                'defaultContent' => $defaultContent,
+                'editorSchema' => $blueprint['schema'],
+                'editorFields' => $blueprint['fields'],
+                'defaultContent' => [
+                    'content' => $blueprint['contentDefaults'],
+                    'style' => $blueprint['styleDefaults'],
+                    'resolvedLocale' => $blueprint['resolvedLocale'],
+                ],
+                'dictionary' => $blueprint['dictionary'],
                 'savedState' => $invitation?->editor_state ?? [],
             ],
             'locales' => self::localeOptionsForTemplate($template, $invitation),
@@ -91,10 +97,14 @@ class PublicTemplateEditorData
     public static function localeOptionsForTemplate(Template $template, ?Invitation $invitation = null): array
     {
         $options = [];
-        $query = $invitation ? ['edit' => $invitation->edit_token] : [];
 
         foreach (config('locales.supported', []) as $code => $meta) {
             $translation = $template->translations->firstWhere('locale', $code);
+            $query = [];
+
+            if ($invitation && $invitation->locale === $code) {
+                $query['edit'] = $invitation->edit_token;
+            }
 
             $options[] = [
                 'code' => $code,

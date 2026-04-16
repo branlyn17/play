@@ -21,6 +21,7 @@ class PublicTemplateInvitationController extends Controller
         $invitation = PublicTemplateEditorData::findInvitationByEditToken($validated['edit_token']);
 
         abort_unless($invitation && $invitation->template, 404);
+        abort_unless($invitation->locale === app()->getLocale(), 404);
 
         $translation = $invitation->template->translations()
             ->where('locale', app()->getLocale())
