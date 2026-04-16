@@ -245,6 +245,7 @@ function generateHtmlDocument(state, template, locale, dictionary) {
 
 export default function PublicTemplateEditorPage({
     appName,
+    auth = {},
     locale = 'es',
     locales = [],
     navigation = [],
@@ -386,6 +387,7 @@ export default function PublicTemplateEditorPage({
     return (
         <PublicLayout
             appName={appName}
+            auth={auth}
             footerCopy={{
                 left: template.name,
                 right: template.teaser ?? template.description ?? '',

@@ -1,7 +1,7 @@
 import Footer from './Footer';
 import Header from './Header';
 
-export default function PublicLayout({ children, appName, footerCopy, headerProps, theme }) {
+export default function PublicLayout({ children, appName, auth, footerCopy, headerProps, theme }) {
     const isLight = theme === 'light';
 
     return (
@@ -24,7 +24,7 @@ export default function PublicLayout({ children, appName, footerCopy, headerProp
             </div>
 
             <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-                <Header appName={appName} theme={theme} {...headerProps} />
+                <Header appName={appName} auth={auth} theme={theme} {...headerProps} />
                 <main className="flex-1 space-y-6 pb-8">{children}</main>
                 <Footer appName={appName} copy={footerCopy} theme={theme} />
             </div>

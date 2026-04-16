@@ -49,8 +49,14 @@ class PublicPage
     public static function navigation(string $locale, string $currentPage): array
     {
         return collect(config("public_pages.navigation.{$locale}", []))
+            ->reject(function (array $item) {
+                return $item['key'] === 'login' && auth()->check();
+            })
             ->map(function (array $item) use ($locale, $currentPage) {
-                $href = $item['href'] ?? route(self::routeName($item['key'], $locale));
+                $href = match ($item['key']) {
+                    'login' => route('login', ['redirect' => request()->getRequestUri()]),
+                    default => $item['href'] ?? route(self::routeName($item['key'], $locale)),
+                };
 
                 return [
                     'key' => $item['key'],

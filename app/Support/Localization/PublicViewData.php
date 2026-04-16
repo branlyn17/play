@@ -2,6 +2,8 @@
 
 namespace App\Support\Localization;
 
+use App\Support\Auth\UserDestination;
+
 class PublicViewData
 {
     public static function make(string $page, array $extraProps = []): array
@@ -13,6 +15,7 @@ class PublicViewData
             'locale' => $locale,
             'shared' => trans('public.shared'),
             'content' => is_array($content) ? $content : [],
+            'auth' => UserDestination::authPayload(),
         ];
 
         if (! array_key_exists('locales', $extraProps)) {

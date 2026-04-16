@@ -1,6 +1,35 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-export default function Header({ appName, navItems, locale, locales, onLocaleChange, labels, uiLabels = {}, theme, onThemeToggle }) {
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+}
+
+function submitLogout(logoutUrl) {
+    if (!logoutUrl) {
+        return;
+    }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = logoutUrl;
+
+    const token = document.createElement('input');
+    token.type = 'hidden';
+    token.name = '_token';
+    token.value = getCsrfToken();
+
+    const redirect = document.createElement('input');
+    redirect.type = 'hidden';
+    redirect.name = 'redirect_to';
+    redirect.value = `${window.location.pathname}${window.location.search}`;
+
+    form.appendChild(token);
+    form.appendChild(redirect);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+export default function Header({ appName, auth = {}, navItems, locale, locales, onLocaleChange, labels, uiLabels = {}, theme, onThemeToggle }) {
     const isLight = theme === 'light';
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLocaleOpen, setIsLocaleOpen] = useState(false);
@@ -12,6 +41,9 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
         menu: uiLabels.menu ?? 'Menu',
         close: uiLabels.close ?? 'Close',
     };
+    const userLabel = auth.displayName ?? '';
+    const isAuthenticated = Boolean(auth.authenticated);
+    const isSuperadmin = auth.primaryRole === 'superadmin';
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -29,7 +61,7 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
 
     useEffect(() => {
         setIsMenuOpen(false);
-    }, [locale, theme]);
+    }, [locale, theme, isAuthenticated]);
 
     return (
         <header
@@ -57,11 +89,7 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                 </div>
 
                 <div className="hidden xl:flex xl:items-center xl:gap-4">
-                    <nav
-                        className={`flex flex-wrap items-center gap-2 rounded-full px-2 py-1 ${
-                            isLight ? 'bg-slate-100/80' : 'bg-white/4'
-                        }`}
-                    >
+                    <nav className={`flex flex-wrap items-center gap-2 rounded-full px-2 py-1 ${isLight ? 'bg-slate-100/80' : 'bg-white/4'}`}>
                         {navItems.map((item) => (
                             <a
                                 key={typeof item === 'string' ? item : item.label}
@@ -72,8 +100,8 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                                             ? 'bg-white text-slate-950 shadow-[0_10px_22px_rgba(148,163,184,0.18)]'
                                             : 'border-white/10 bg-white/10 text-white'
                                         : isLight
-                                        ? 'text-slate-600 hover:bg-white hover:text-slate-950'
-                                        : 'text-white/70 hover:border-white/10 hover:bg-white/6 hover:text-white'
+                                          ? 'text-slate-600 hover:bg-white hover:text-slate-950'
+                                          : 'text-white/70 hover:border-white/10 hover:bg-white/6 hover:text-white'
                                 }`}
                             >
                                 {typeof item === 'string' ? item : item.label}
@@ -85,14 +113,14 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                         <button
                             type="button"
                             onClick={onThemeToggle}
-                            className={`inline-flex h-11 w-11 items-center justify-center rounded-full border text-lg transition ${
+                            className={`inline-flex h-11 w-11 items-center justify-center rounded-full border text-xs font-semibold transition ${
                                 isLight
                                     ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                                     : 'border-white/10 bg-white/6 text-white/80 hover:bg-white/10'
                             }`}
                             aria-label={headerUi.themeToggle}
                         >
-                            {isLight ? '☾' : '☼'}
+                            {isLight ? 'D' : 'L'}
                         </button>
 
                         <div className="relative" ref={localeRef}>
@@ -105,9 +133,9 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                                         : 'border-white/10 bg-white/6 text-white/85 hover:bg-white/10'
                                 }`}
                             >
-                                <span className="text-base">{activeLocale.flag}</span>
-                                <span>{activeLocale.label}</span>
-                                <span className={`${isLocaleOpen ? 'rotate-180' : ''} text-xs transition-transform`}>▾</span>
+                                <span className="text-base">{activeLocale?.flag}</span>
+                                <span>{activeLocale?.label}</span>
+                                <span className={`${isLocaleOpen ? 'rotate-180' : ''} text-xs transition-transform`}>v</span>
                             </button>
 
                             {isLocaleOpen ? (
@@ -143,16 +171,49 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                             ) : null}
                         </div>
 
-                        <a
-                            href="#"
-                            className={`rounded-full px-5 py-3 text-sm font-semibold transition ${
-                                isLight
-                                    ? 'bg-indigo-600 text-white shadow-[0_16px_30px_rgba(79,70,229,0.22)] hover:bg-indigo-500'
-                                    : 'bg-indigo-500 text-white shadow-[0_16px_30px_rgba(99,102,241,0.22)] hover:bg-indigo-400'
-                            }`}
-                        >
-                            {labels.cta}
-                        </a>
+                        {isAuthenticated ? (
+                            <div className="flex items-center gap-3">
+                                <div className={`rounded-full border px-4 py-2.5 text-sm font-semibold ${isLight ? 'border-slate-200 bg-white text-slate-700' : 'border-white/10 bg-white/6 text-white/90'}`}>
+                                    {userLabel}
+                                </div>
+
+                                {isSuperadmin && auth.dashboardUrl ? (
+                                    <a
+                                        href={auth.dashboardUrl}
+                                        className={`rounded-full px-5 py-3 text-sm font-semibold transition ${
+                                            isLight
+                                                ? 'bg-slate-900 text-white hover:bg-slate-800'
+                                                : 'bg-white text-slate-950 hover:bg-slate-100'
+                                        }`}
+                                    >
+                                        Panel
+                                    </a>
+                                ) : null}
+
+                                <button
+                                    type="button"
+                                    onClick={() => submitLogout(auth.logoutUrl)}
+                                    className={`rounded-full px-5 py-3 text-sm font-semibold transition ${
+                                        isLight
+                                            ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                            : 'bg-white/8 text-white hover:bg-white/12'
+                                    }`}
+                                >
+                                    Salir
+                                </button>
+                            </div>
+                        ) : (
+                            <a
+                                href={auth.loginUrl ?? '#'}
+                                className={`rounded-full px-5 py-3 text-sm font-semibold transition ${
+                                    isLight
+                                        ? 'bg-indigo-600 text-white shadow-[0_16px_30px_rgba(79,70,229,0.22)] hover:bg-indigo-500'
+                                        : 'bg-indigo-500 text-white shadow-[0_16px_30px_rgba(99,102,241,0.22)] hover:bg-indigo-400'
+                                }`}
+                            >
+                                {labels.cta}
+                            </a>
+                        )}
                     </div>
                 </div>
 
@@ -160,14 +221,14 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                     <button
                         type="button"
                         onClick={onThemeToggle}
-                        className={`inline-flex h-11 w-11 items-center justify-center rounded-full border text-lg transition ${
+                        className={`inline-flex h-11 w-11 items-center justify-center rounded-full border text-xs font-semibold transition ${
                             isLight
                                 ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                                 : 'border-white/10 bg-white/6 text-white/80 hover:bg-white/10'
                         }`}
                         aria-label={headerUi.themeToggle}
                     >
-                        {isLight ? '☾' : '☼'}
+                        {isLight ? 'D' : 'L'}
                     </button>
 
                     <button
@@ -186,9 +247,7 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
             </div>
 
             {isMenuOpen ? (
-                <div className={`mt-4 space-y-4 rounded-[1.5rem] border p-4 xl:hidden ${
-                    isLight ? 'border-slate-200 bg-white/75' : 'border-white/10 bg-white/6'
-                }`}>
+                <div className={`mt-4 space-y-4 rounded-[1.5rem] border p-4 xl:hidden ${isLight ? 'border-slate-200 bg-white/75' : 'border-white/10 bg-white/6'}`}>
                     <nav className="grid gap-2">
                         {navItems.map((item) => (
                             <a
@@ -200,8 +259,8 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                                             ? 'bg-indigo-600 text-white'
                                             : 'bg-white text-slate-950'
                                         : isLight
-                                        ? 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-                                        : 'bg-white/6 text-white/80 hover:bg-white/10 hover:text-white'
+                                          ? 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                          : 'bg-white/6 text-white/80 hover:bg-white/10 hover:text-white'
                                 }`}
                             >
                                 {typeof item === 'string' ? item : item.label}
@@ -240,16 +299,49 @@ export default function Header({ appName, navItems, locale, locales, onLocaleCha
                         </div>
                     </div>
 
-                    <a
-                        href="#"
-                        className={`block rounded-2xl px-5 py-3 text-center text-sm font-semibold transition ${
-                            isLight
-                                ? 'bg-indigo-600 text-white shadow-[0_16px_30px_rgba(79,70,229,0.22)] hover:bg-indigo-500'
-                                : 'bg-indigo-500 text-white shadow-[0_16px_30px_rgba(99,102,241,0.22)] hover:bg-indigo-400'
-                        }`}
-                    >
-                        {labels.cta}
-                    </a>
+                    {isAuthenticated ? (
+                        <div className="space-y-2">
+                            <div className={`rounded-2xl px-4 py-3 text-sm font-semibold ${isLight ? 'bg-slate-50 text-slate-700' : 'bg-white/6 text-white'}`}>
+                                {userLabel}
+                            </div>
+
+                            {isSuperadmin && auth.dashboardUrl ? (
+                                <a
+                                    href={auth.dashboardUrl}
+                                    className={`block rounded-2xl px-5 py-3 text-center text-sm font-semibold transition ${
+                                        isLight
+                                            ? 'bg-slate-900 text-white hover:bg-slate-800'
+                                            : 'bg-white text-slate-950 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    Panel
+                                </a>
+                            ) : null}
+
+                            <button
+                                type="button"
+                                onClick={() => submitLogout(auth.logoutUrl)}
+                                className={`block w-full rounded-2xl px-5 py-3 text-center text-sm font-semibold transition ${
+                                    isLight
+                                        ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                        : 'bg-white/8 text-white hover:bg-white/12'
+                                }`}
+                            >
+                                Salir
+                            </button>
+                        </div>
+                    ) : (
+                        <a
+                            href={auth.loginUrl ?? '#'}
+                            className={`block rounded-2xl px-5 py-3 text-center text-sm font-semibold transition ${
+                                isLight
+                                    ? 'bg-indigo-600 text-white shadow-[0_16px_30px_rgba(79,70,229,0.22)] hover:bg-indigo-500'
+                                    : 'bg-indigo-500 text-white shadow-[0_16px_30px_rgba(99,102,241,0.22)] hover:bg-indigo-400'
+                            }`}
+                        >
+                            {labels.cta}
+                        </a>
+                    )}
                 </div>
             ) : null}
         </header>

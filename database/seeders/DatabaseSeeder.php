@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,13 +13,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             LanguageSeeder::class,
+            RoleSeeder::class,
+            UserSeeder::class,
             InvitationCategorySeeder::class,
             TemplateSeeder::class,
         ]);
-
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            ['name' => 'Test User', 'password' => bcrypt('password')],
-        );
     }
 }

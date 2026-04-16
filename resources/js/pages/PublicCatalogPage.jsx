@@ -32,6 +32,7 @@ function normalizeCatalogContent(content = {}) {
 
 export default function PublicCatalogPage({
     appName,
+    auth = {},
     locale = 'es',
     locales = [],
     navigation = [],
@@ -76,6 +77,7 @@ export default function PublicCatalogPage({
     return (
         <PublicLayout
             appName={appName}
+            auth={auth}
             footerCopy={current.footer}
             theme={theme}
             headerProps={{

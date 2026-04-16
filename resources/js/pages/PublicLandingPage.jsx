@@ -28,6 +28,7 @@ function normalizeHomeContent(content = {}) {
 
 export default function PublicLandingPage({
     appName,
+    auth = {},
     locale = 'es',
     locales = [],
     navigation = [],
@@ -70,6 +71,7 @@ export default function PublicLandingPage({
     return (
         <PublicLayout
             appName={appName}
+            auth={auth}
             footerCopy={current.footer}
             theme={theme}
             headerProps={{
