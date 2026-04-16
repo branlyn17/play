@@ -10,25 +10,38 @@ class Event extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'owner_user_id',
         'title',
         'description',
-        'event_date',
+        'starts_at',
+        'ends_at',
         'timezone',
-        'location',
+        'venue_name',
+        'address_line',
+        'city',
+        'region',
+        'country',
+        'location_url',
         'latitude',
         'longitude',
-        'capacity',
-        'is_public'
+        'cover_image_path',
+        'contact_name',
+        'contact_email',
+        'contact_phone',
+        'guest_capacity',
+        'privacy',
+        'status',
+        'published_at',
+        'last_accessed_at',
     ];
 
-    // Relación con User
-    public function user() {
-        return $this->belongsTo(User::class);
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_user_id');
     }
 
-    // Relación con Invitations
-    public function invitations() {
+    public function invitations()
+    {
         return $this->hasMany(Invitation::class);
     }
 }

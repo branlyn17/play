@@ -6,65 +6,41 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('events', function (Blueprint $table) {
-
-            // Crea la columna 'id' como clave primaria auto-incremental (bigint)
             $table->id();
-
-            // Crea la columna 'user_id' como clave foránea que apunta a 'users.id'.
-            // Esto indica qué usuario creó el evento.
-            // 'onDelete("cascade")' significa que si se borra el usuario, todos sus eventos se borrarán automáticamente.
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-
-            // Columna para el título del evento, ej: "Boda de Ana & David"
+            $table->foreignId('owner_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('title');
-
-            // Columna de texto para una descripción más larga del evento, nullable porque puede no tener descripción.
             $table->text('description')->nullable();
-
-            // Fecha y hora del evento. Ej: '2025-12-14 18:00:00'
-            $table->dateTime('event_date');
-
-            // Zona horaria del evento, ej: "America/La_Paz". Importante para manejar zonas horarias
+            $table->dateTime('starts_at')->nullable();
+            $table->dateTime('ends_at')->nullable();
             $table->string('timezone', 64)->default('UTC');
-
-            // Ubicación del evento, ej: "Salón Jardines del Valle, Cochabamba".
-            // Nullable porque en algunos casos puede no especificarse.
-            $table->string('location')->nullable();
-
-            // Latitud geográfica del evento, formato decimal con 10 dígitos totales y 7 decimales.
-            // Nullable si no se quiere especificar coordenadas exactas.
+            $table->string('venue_name')->nullable();
+            $table->string('address_line')->nullable();
+            $table->string('city')->nullable();
+            $table->string('region')->nullable();
+            $table->string('country', 2)->nullable();
+            $table->string('location_url')->nullable();
             $table->decimal('latitude', 10, 7)->nullable();
-
-            // Longitud geográfica del evento, formato decimal con 10 dígitos totales y 7 decimales.
-            // Nullable igual que la latitud.
             $table->decimal('longitude', 10, 7)->nullable();
-
-            // Capacidad máxima de asistentes, nullable si no hay límite.
-            $table->unsignedInteger('capacity')->nullable();
-
-            // Indica si el evento es público (visible para todos) o privado (solo para invitados).
-            $table->boolean('is_public')->default(false);
-
-            // Permite marcar eventos como borrados sin eliminarlos físicamente de la base de datos.
-            $table->softDeletes(); 
-
-            // Crea automáticamente las columnas 'created_at' y 'updated_at' para llevar registro de cuándo se creó y actualizó el evento.
+            $table->string('cover_image_path')->nullable();
+            $table->string('contact_name')->nullable();
+            $table->string('contact_email')->nullable();
+            $table->string('contact_phone', 32)->nullable();
+            $table->unsignedInteger('guest_capacity')->nullable();
+            $table->enum('privacy', ['public', 'unlisted', 'private'])->default('unlisted');
+            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
+            $table->timestamp('published_at')->nullable();
+            $table->timestamp('last_accessed_at')->nullable();
+            $table->softDeletes();
             $table->timestamps();
 
-            // Índice para optimizar consultas por usuario y fecha del evento.
-            // $table->index(['user_id', 'event_date']);
+            $table->index(['owner_user_id', 'status']);
+            $table->index(['starts_at', 'status']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('events');
