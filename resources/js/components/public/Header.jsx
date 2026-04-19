@@ -29,6 +29,30 @@ function submitLogout(logoutUrl) {
     form.submit();
 }
 
+function ThemeSunIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2" />
+            <path d="M12 20v2" />
+            <path d="m4.93 4.93 1.41 1.41" />
+            <path d="m17.66 17.66 1.41 1.41" />
+            <path d="M2 12h2" />
+            <path d="M20 12h2" />
+            <path d="m6.34 17.66-1.41 1.41" />
+            <path d="m19.07 4.93-1.41 1.41" />
+        </svg>
+    );
+}
+
+function ThemeMoonIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
+        </svg>
+    );
+}
+
 export default function Header({ appName, auth = {}, navItems, locale, locales, onLocaleChange, labels, uiLabels = {}, theme, onThemeToggle }) {
     const isLight = theme === 'light';
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -113,14 +137,14 @@ export default function Header({ appName, auth = {}, navItems, locale, locales, 
                         <button
                             type="button"
                             onClick={onThemeToggle}
-                            className={`inline-flex h-11 w-11 items-center justify-center rounded-full border text-xs font-semibold transition ${
+                            className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition ${
                                 isLight
                                     ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                                     : 'border-white/10 bg-white/6 text-white/80 hover:bg-white/10'
                             }`}
                             aria-label={headerUi.themeToggle}
                         >
-                            {isLight ? 'D' : 'L'}
+                            {isLight ? <ThemeMoonIcon /> : <ThemeSunIcon />}
                         </button>
 
                         <div className="relative" ref={localeRef}>
@@ -221,14 +245,14 @@ export default function Header({ appName, auth = {}, navItems, locale, locales, 
                     <button
                         type="button"
                         onClick={onThemeToggle}
-                        className={`inline-flex h-11 w-11 items-center justify-center rounded-full border text-xs font-semibold transition ${
+                        className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition ${
                             isLight
                                 ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                                 : 'border-white/10 bg-white/6 text-white/80 hover:bg-white/10'
                         }`}
                         aria-label={headerUi.themeToggle}
                     >
-                        {isLight ? 'D' : 'L'}
+                        {isLight ? <ThemeMoonIcon /> : <ThemeSunIcon />}
                     </button>
 
                     <button
