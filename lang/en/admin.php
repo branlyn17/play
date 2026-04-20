@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'title' => 'Admin panel | Invita Plus',
@@ -31,7 +31,7 @@ return [
         ],
         'items' => [
             'dashboard' => 'Executive dashboard',
-            'templates' => 'Products',
+            'templates' => 'Templates',
             'catalog' => 'Add product',
             'categories' => 'Invoices',
             'plans' => 'Create invoice',
@@ -97,6 +97,37 @@ return [
                 'Measure the most viewed, most downloaded and best converting templates.',
                 'Prepare translations and SEO modules to scale the catalog.',
             ],
+        ],
+    ],
+    'templates' => [
+        'breadcrumb' => 'Templates',
+        'title' => 'Templates',
+        'subtitle' => 'An operational view to review every template available in the system, with search and paginated navigation.',
+        'search_placeholder' => 'Search by name, slug or code...',
+        'search_action' => 'Search',
+        'table_title' => 'Template list',
+        'results' => '{0} No results|{1} :count template total|[2,*] :count templates total',
+        'empty_teaser' => 'No short description available.',
+        'uncategorized' => 'Uncategorized',
+        'empty_title' => 'No templates found',
+        'empty_text' => 'Try another search or clear the filter to view the full catalog.',
+        'columns' => [
+            'name' => 'Template',
+            'code' => 'Code',
+            'category' => 'Category',
+            'status' => 'Status',
+            'metrics' => 'Metrics',
+        ],
+        'badges' => [
+            'active' => 'Active',
+            'inactive' => 'Inactive',
+            'featured' => 'Featured',
+            'premium' => 'Premium',
+        ],
+        'metrics' => [
+            'views' => 'Views',
+            'downloads' => 'Downloads',
+            'uses' => 'Uses',
         ],
     ],
 ];

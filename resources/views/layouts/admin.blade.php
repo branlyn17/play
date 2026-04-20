@@ -119,6 +119,12 @@
                     'href' => request()->url().'?'.http_build_query(array_merge($localeQuery, ['lang' => $code])),
                 ];
             })->values()->all();
+            $adminRouteQuery = request()->has('lang') ? ['lang' => request()->query('lang')] : [];
+            $sidebarItemRoutes = [
+                'dashboard' => route('admin.dashboard', $adminRouteQuery),
+                'templates' => route('admin.templates.index', $adminRouteQuery),
+            ];
+            $activeSidebarItem = request()->routeIs('admin.templates.*') ? 'templates' : 'dashboard';
         @endphp
 
         <script>
@@ -149,9 +155,10 @@
                         <div class="flex-1 overflow-y-auto px-3 py-3" data-admin-scroll>
                             <nav class="space-y-2">
                                 @foreach ($sidebarSections as $section)
+                                    @php($sectionIsActive = in_array($activeSidebarItem, $section['items'], true))
                                     <section class="rounded-[1.4rem] p-1">
-                                        <button type="button" data-admin-accordion-trigger data-target="submenu-{{ $section['key'] }}" data-expanded="{{ $section['expanded'] ? 'true' : 'false' }}" class="flex w-full items-center gap-3 rounded-[1.2rem] px-3 py-2.5 text-left transition {{ $section['key'] === 'overview' ? 'border border-[color:var(--admin-primary)]/60 bg-[color:var(--admin-primary-soft)] text-[color:var(--admin-primary)]' : 'hover:bg-[color:var(--admin-surface)]' }}">
-                                            <span class="flex h-10 w-10 items-center justify-center rounded-2xl {{ $section['key'] === 'overview' ? 'bg-[color:var(--admin-primary)] text-white' : 'text-[color:var(--admin-text-soft)]' }}">
+                                        <button type="button" data-admin-accordion-trigger data-target="submenu-{{ $section['key'] }}" data-expanded="{{ $sectionIsActive || $section['expanded'] ? 'true' : 'false' }}" class="flex w-full items-center gap-3 rounded-[1.2rem] px-3 py-2.5 text-left transition {{ $sectionIsActive ? 'border border-[color:var(--admin-primary)]/60 bg-[color:var(--admin-primary-soft)] text-[color:var(--admin-primary)]' : 'hover:bg-[color:var(--admin-surface)]' }}">
+                                            <span class="flex h-10 w-10 items-center justify-center rounded-2xl {{ $sectionIsActive ? 'bg-[color:var(--admin-primary)] text-white' : 'text-[color:var(--admin-text-soft)]' }}">
                                                 @switch($section['icon'])
                                                     @case('grid')
                                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
@@ -172,7 +179,7 @@
                                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 10.91 3H11a2 2 0 1 1 4 0h.09a1.65 1.65 0 0 0 1.51 1c.3.05.61-.01.87-.17.26-.16.47-.38.62-.65l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09A1.65 1.65 0 0 0 21 10.91V11a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
                                                 @endswitch
                                             </span>
-                                            <span class="min-w-0 flex-1 text-[1rem] font-semibold {{ $section['key'] === 'overview' ? 'text-[color:var(--admin-primary)]' : 'text-[color:var(--admin-text)]' }}">{{ trans("admin.sidebar.sections.{$section['key']}") }}</span>
+                                            <span class="min-w-0 flex-1 text-[1rem] font-semibold {{ $sectionIsActive ? 'text-[color:var(--admin-primary)]' : 'text-[color:var(--admin-text)]' }}">{{ trans("admin.sidebar.sections.{$section['key']}") }}</span>
                                             <span class="text-[color:var(--admin-muted)] transition-transform duration-200" data-admin-chevron>
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
                                             </span>
@@ -181,10 +188,18 @@
                                         <div id="submenu-{{ $section['key'] }}" data-admin-submenu class="mt-0 opacity-0" style="max-height: 0;">
                                             <div class="ml-4 space-y-0.5 border-l border-[color:var(--admin-border)] pl-4 pt-2">
                                                 @foreach ($section['items'] as $item)
-                                                    <button type="button" class="group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition hover:bg-[color:var(--admin-surface)]">
-                                                        <span class="h-2 w-2 rounded-full bg-[color:var(--admin-border)] transition group-hover:bg-[color:var(--admin-primary)]"></span>
-                                                        <span class="text-[0.95rem] font-medium text-[color:var(--admin-text-soft)]">{{ trans("admin.sidebar.items.{$item}") }}</span>
-                                                    </button>
+                                                    @php($itemIsActive = $activeSidebarItem === $item)
+                                                    @if (isset($sidebarItemRoutes[$item]))
+                                                        <a href="{{ $sidebarItemRoutes[$item] }}" class="group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition {{ $itemIsActive ? 'bg-[color:var(--admin-primary-soft)]' : 'hover:bg-[color:var(--admin-surface)]' }}">
+                                                            <span class="h-2 w-2 rounded-full transition {{ $itemIsActive ? 'bg-[color:var(--admin-primary)]' : 'bg-[color:var(--admin-border)] group-hover:bg-[color:var(--admin-primary)]' }}"></span>
+                                                            <span class="text-[0.95rem] font-medium {{ $itemIsActive ? 'text-[color:var(--admin-text)]' : 'text-[color:var(--admin-text-soft)]' }}">{{ trans("admin.sidebar.items.{$item}") }}</span>
+                                                        </a>
+                                                    @else
+                                                        <button type="button" class="group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition hover:bg-[color:var(--admin-surface)]">
+                                                            <span class="h-2 w-2 rounded-full bg-[color:var(--admin-border)] transition group-hover:bg-[color:var(--admin-primary)]"></span>
+                                                            <span class="text-[0.95rem] font-medium text-[color:var(--admin-text-soft)]">{{ trans("admin.sidebar.items.{$item}") }}</span>
+                                                        </button>
+                                                    @endif
                                                 @endforeach
                                             </div>
                                         </div>

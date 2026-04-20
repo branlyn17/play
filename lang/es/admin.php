@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
 
 return [
     'title' => 'Panel admin | Invita Plus',
@@ -31,7 +31,7 @@ return [
         ],
         'items' => [
             'dashboard' => 'Dashboard ejecutivo',
-            'templates' => 'Productos',
+            'templates' => 'Plantillas',
             'catalog' => 'Anadir producto',
             'categories' => 'Facturas',
             'plans' => 'Crear factura',
@@ -50,7 +50,7 @@ return [
     'dashboard' => [
         'breadcrumb' => 'Panel',
         'title' => 'Panel',
-        'subtitle' => 'Bienvenido de nuevo. Aqui vivirán las decisiones clave del negocio y la operacion diaria de Invita Plus.',
+        'subtitle' => 'Bienvenido de nuevo. Aqui viviran las decisiones clave del negocio y la operacion diaria de Invita Plus.',
         'stats' => [
             [
                 'label' => 'Ingresos estimados',
@@ -97,6 +97,37 @@ return [
                 'Medir plantillas mas vistas, mas descargadas y mejor convertidas.',
                 'Preparar modulo de traducciones y SEO para escalar el catalogo.',
             ],
+        ],
+    ],
+    'templates' => [
+        'breadcrumb' => 'Plantillas',
+        'title' => 'Plantillas',
+        'subtitle' => 'Una vista operativa para revisar todas las plantillas disponibles en el sistema, con busqueda y navegacion paginada.',
+        'search_placeholder' => 'Buscar por nombre, slug o codigo...',
+        'search_action' => 'Buscar',
+        'table_title' => 'Listado de plantillas',
+        'results' => '{0} Sin resultados|{1} :count plantilla en total|[2,*] :count plantillas en total',
+        'empty_teaser' => 'Sin descripcion breve disponible.',
+        'uncategorized' => 'Sin categoria',
+        'empty_title' => 'No se encontraron plantillas',
+        'empty_text' => 'Prueba con otra busqueda o limpia el filtro para ver todo el catalogo.',
+        'columns' => [
+            'name' => 'Plantilla',
+            'code' => 'Codigo',
+            'category' => 'Categoria',
+            'status' => 'Estado',
+            'metrics' => 'Metricas',
+        ],
+        'badges' => [
+            'active' => 'Activa',
+            'inactive' => 'Inactiva',
+            'featured' => 'Destacada',
+            'premium' => 'Premium',
+        ],
+        'metrics' => [
+            'views' => 'Vistas',
+            'downloads' => 'Descargas',
+            'uses' => 'Usos',
         ],
     ],
 ];
