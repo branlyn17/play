@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\InvitationCategory;
 use App\Models\Template;
 use App\Models\TemplateTranslation;
+use App\Support\Templates\TemplateFieldCatalog;
 use Illuminate\Database\Seeder;
 
 class TemplateSeeder extends Seeder
@@ -465,7 +466,7 @@ class TemplateSeeder extends Seeder
                     'source_html_path' => "templates/{$data['code']}/index.html",
                     'source_css_path' => "templates/{$data['code']}/style.css",
                     'source_js_path' => null,
-                    'editor_schema' => $this->editorSchema(),
+                    'editor_schema' => TemplateFieldCatalog::editorSchema(),
                     'default_content' => [
                         'shared' => [
                             'style' => $data['defaults']['style'],
@@ -473,8 +474,8 @@ class TemplateSeeder extends Seeder
                         'locales' => $data['defaults']['locales'],
                     ],
                     'design_tokens' => $data['design_tokens'],
-                    'available_fonts' => ['Sora', 'Manrope', 'Cormorant Garamond'],
-                    'available_colors' => ['sky', 'indigo', 'rose', 'emerald', 'slate'],
+                    'available_fonts' => TemplateFieldCatalog::availableFonts(),
+                    'available_colors' => TemplateFieldCatalog::availableColorTokens(),
                     'is_active' => true,
                     'is_featured' => $data['is_featured'],
                     'is_premium' => $data['is_premium'],
@@ -498,29 +499,4 @@ class TemplateSeeder extends Seeder
         }
     }
 
-    protected function editorSchema(): array
-    {
-        return [
-            'version' => 1,
-            'sections' => ['hero', 'event', 'countdown', 'gallery', 'rsvp'],
-            'supports' => ['colors', 'fonts', 'spacing', 'backgrounds'],
-            'fields' => [
-                ['key' => 'eventLabel', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'event_label'],
-                ['key' => 'headline', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'headline'],
-                ['key' => 'subheadline', 'group' => 'content', 'type' => 'textarea', 'multiline' => true, 'translatable' => true, 'label_key' => 'subheadline'],
-                ['key' => 'hosts', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'hosts'],
-                ['key' => 'dateLabel', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'date_label'],
-                ['key' => 'timeLabel', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'time_label'],
-                ['key' => 'venueLabel', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'venue_label'],
-                ['key' => 'message', 'group' => 'content', 'type' => 'textarea', 'multiline' => true, 'translatable' => true, 'label_key' => 'message'],
-                ['key' => 'closing', 'group' => 'content', 'type' => 'textarea', 'multiline' => true, 'translatable' => true, 'label_key' => 'closing'],
-                ['key' => 'buttonLabel', 'group' => 'content', 'type' => 'text', 'translatable' => true, 'label_key' => 'button_label'],
-                ['key' => 'accentColor', 'group' => 'style', 'type' => 'color', 'translatable' => false, 'label_key' => 'accent_color'],
-                ['key' => 'backgroundColor', 'group' => 'style', 'type' => 'color', 'translatable' => false, 'label_key' => 'background_color'],
-                ['key' => 'surfaceColor', 'group' => 'style', 'type' => 'color', 'translatable' => false, 'label_key' => 'surface_color'],
-                ['key' => 'textColor', 'group' => 'style', 'type' => 'color', 'translatable' => false, 'label_key' => 'text_color'],
-                ['key' => 'fontFamily', 'group' => 'style', 'type' => 'select', 'translatable' => false, 'label_key' => 'font_family'],
-            ],
-        ];
-    }
 }

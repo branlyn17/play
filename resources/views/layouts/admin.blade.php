@@ -65,6 +65,14 @@
                 background: rgba(148, 163, 184, 0.26);
             }
 
+            #admin-sidebar {
+                transform: translateX(-110%);
+                translate: 0 0;
+                opacity: 0;
+                pointer-events: none;
+                transition: transform 240ms ease, opacity 220ms ease;
+            }
+
             @media (min-width: 1024px) {
                 #admin-shell {
                     display: grid;
@@ -76,20 +84,27 @@
 
                 html[data-admin-sidebar='closed'] #admin-shell {
                     grid-template-columns: 0 minmax(0, 1fr);
+                    gap: 0;
                 }
 
                 #admin-sidebar {
                     position: sticky;
                     top: 1rem;
+                    right: auto;
+                    bottom: auto;
+                    left: auto;
+                    width: var(--admin-sidebar-width);
+                    justify-self: start;
                     height: calc(100vh - 2rem);
                     transform: translateX(0);
+                    translate: 0 0;
                     opacity: 1;
                     pointer-events: auto;
-                    transition: transform 240ms ease, opacity 220ms ease;
                 }
 
                 html[data-admin-sidebar='closed'] #admin-sidebar {
                     transform: translateX(calc(-100% - 24px));
+                    translate: 0 0;
                     opacity: 0;
                     pointer-events: none;
                 }
@@ -141,7 +156,7 @@
                 <div id="admin-shell" class="relative">
                     <div id="admin-sidebar-backdrop" class="fixed inset-0 z-30 hidden bg-slate-950/60 backdrop-blur-sm lg:hidden"></div>
 
-                    <aside id="admin-sidebar" data-admin-shell class="fixed inset-y-4 left-4 z-40 flex w-[min(var(--admin-sidebar-width),calc(100vw-2rem))] -translate-x-[110%] flex-col rounded-[2rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-sidebar)] shadow-[var(--admin-shadow)] backdrop-blur-2xl lg:w-[var(--admin-sidebar-width)]">
+                    <aside id="admin-sidebar" data-admin-shell class="fixed inset-y-4 left-4 z-40 flex w-[min(var(--admin-sidebar-width),calc(100vw-2rem))] flex-col rounded-[2rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-sidebar)] shadow-[var(--admin-shadow)] backdrop-blur-2xl lg:w-[var(--admin-sidebar-width)]">
                         <div class="flex items-center justify-between border-b border-[color:var(--admin-border)] px-4 py-4">
                             <div class="flex min-w-0 items-center gap-3">
                                 <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color:var(--admin-primary)] text-base font-black text-white shadow-[0_18px_32px_rgba(79,124,255,0.3)]">T</div>

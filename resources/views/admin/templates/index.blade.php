@@ -2,6 +2,12 @@
 
 @section('content')
     <div class="space-y-5">
+        @if (session('status'))
+            <section class="rounded-[1.8rem] border border-emerald-400/30 bg-emerald-400/10 px-5 py-4 text-sm text-emerald-100 shadow-[var(--admin-shadow)]">
+                {{ session('status') }}
+            </section>
+        @endif
+
         <section class="rounded-[2rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-6 shadow-[var(--admin-shadow)]">
             <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div>
@@ -13,24 +19,33 @@
                     <p class="mt-3 max-w-3xl text-base leading-8 text-[color:var(--admin-text-soft)]">{{ trans('admin.templates.subtitle') }}</p>
                 </div>
 
-                <form method="GET" action="{{ route('admin.templates.index') }}" class="w-full max-w-xl">
-                    @if (request()->has('lang'))
-                        <input type="hidden" name="lang" value="{{ request()->query('lang') }}">
-                    @endif
-                    <div class="flex h-12 items-center gap-3 rounded-[1.2rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-strong)] px-4">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[color:var(--admin-muted)]"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-                        <input
-                            type="search"
-                            name="search"
-                            value="{{ $search }}"
-                            placeholder="{{ trans('admin.templates.search_placeholder') }}"
-                            class="min-w-0 flex-1 bg-transparent text-sm text-[color:var(--admin-text)] outline-none placeholder:text-[color:var(--admin-muted)]"
-                        >
-                        <button type="submit" class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-[color:var(--admin-primary-soft)] px-3 text-sm font-semibold text-[color:var(--admin-primary)] transition hover:bg-[color:var(--admin-primary-soft)]/80">
-                            {{ trans('admin.templates.search_action') }}
-                        </button>
-                    </div>
-                </form>
+                <div class="flex w-full max-w-5xl flex-col gap-3 lg:items-end">
+                    <a
+                        href="{{ route('admin.templates.create', request()->has('lang') ? ['lang' => request()->query('lang')] : []) }}"
+                        class="inline-flex h-11 cursor-pointer items-center justify-center rounded-[1.1rem] bg-[color:var(--admin-primary)] px-4 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(79,124,255,0.22)] transition hover:brightness-110"
+                    >
+                        {{ trans('admin.templates.create.cta') }}
+                    </a>
+
+                    <form method="GET" action="{{ route('admin.templates.index') }}" class="w-full max-w-xl">
+                        @if (request()->has('lang'))
+                            <input type="hidden" name="lang" value="{{ request()->query('lang') }}">
+                        @endif
+                        <div class="flex h-12 items-center gap-3 rounded-[1.2rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-strong)] px-4">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[color:var(--admin-muted)]"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                            <input
+                                type="search"
+                                name="search"
+                                value="{{ $search }}"
+                                placeholder="{{ trans('admin.templates.search_placeholder') }}"
+                                class="min-w-0 flex-1 bg-transparent text-sm text-[color:var(--admin-text)] outline-none placeholder:text-[color:var(--admin-muted)]"
+                            >
+                            <button type="submit" class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-[color:var(--admin-primary-soft)] px-3 text-sm font-semibold text-[color:var(--admin-primary)] transition hover:bg-[color:var(--admin-primary-soft)]/80">
+                                {{ trans('admin.templates.search_action') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </section>
 

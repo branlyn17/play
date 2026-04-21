@@ -7,6 +7,7 @@ use App\Models\Template;
 use App\Models\TemplateTranslation;
 use App\Support\Localization\PublicPage;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class PublicTemplateEditorData
@@ -63,6 +64,11 @@ class PublicTemplateEditorData
         $blueprint = TemplateEditorBlueprint::resolve($template, $locale);
 
         $designTokens = $template->design_tokens ?? [];
+        $htmlSource = null;
+
+        if ($template->source_html_path && Storage::exists($template->source_html_path)) {
+            $htmlSource = Storage::get($template->source_html_path);
+        }
 
         return [
             'template' => [
@@ -80,6 +86,7 @@ class PublicTemplateEditorData
                 'designTokens' => $designTokens,
                 'availableFonts' => $template->available_fonts ?? [],
                 'availableColors' => $template->available_colors ?? [],
+                'htmlSource' => $htmlSource,
                 'editorSchema' => $blueprint['schema'],
                 'editorFields' => $blueprint['fields'],
                 'defaultContent' => [

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\TemplateCreateController;
 use App\Http\Controllers\Admin\TemplateIndexController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PublicCatalogController;
@@ -25,6 +26,8 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
             Route::get('/', DashboardController::class)->name('dashboard');
             Route::get('/templates', TemplateIndexController::class)->name('templates.index');
+            Route::get('/templates/create', [TemplateCreateController::class, 'create'])->name('templates.create');
+            Route::post('/templates', [TemplateCreateController::class, 'store'])->name('templates.store');
         });
 });
 

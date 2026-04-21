@@ -8,6 +8,8 @@ const fontLinks = {
     'Cormorant Garamond': 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap',
 };
 
+const multilineFields = new Set(['subheadline', 'message', 'closing']);
+
 function normalizeContent(content = {}) {
     return {
         header: content.header ?? {},
@@ -66,7 +68,69 @@ function formatHtmlText(value) {
     return escapeHtml(value).replace(/\n/g, '<br />');
 }
 
+function injectFontLink(documentHtml, fontFamily) {
+    const fontLink = fontLinks[fontFamily];
+
+    if (!fontLink || documentHtml.includes(fontLink)) {
+        return documentHtml;
+    }
+
+    const injection = `
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="${fontLink}" rel="stylesheet">`;
+
+    if (documentHtml.includes('</head>')) {
+        return documentHtml.replace('</head>', `${injection}\n</head>`);
+    }
+
+    return `${injection}\n${documentHtml}`;
+}
+
+function setHtmlLanguage(documentHtml, locale) {
+    if (/<html\b[^>]*lang=/i.test(documentHtml)) {
+        return documentHtml.replace(/<html([^>]*)lang=(['"]).*?\2([^>]*)>/i, `<html$1lang="${escapeHtml(locale)}"$3>`);
+    }
+
+    if (/<html\b/i.test(documentHtml)) {
+        return documentHtml.replace(/<html\b([^>]*)>/i, `<html lang="${escapeHtml(locale)}"$1>`);
+    }
+
+    return documentHtml;
+}
+
+function renderUploadedHtmlTemplate(sourceHtml, state, locale, dictionary) {
+    const labels = normalizeDictionary(dictionary).labels;
+    const replacements = {
+        ...Object.fromEntries(
+            Object.entries(state).map(([key, value]) => [
+                key,
+                multilineFields.has(key) ? formatHtmlText(value) : escapeHtml(value),
+            ]),
+        ),
+        label_hosts: escapeHtml(labels.hosts),
+        label_date: escapeHtml(labels.date),
+        label_time: escapeHtml(labels.time),
+        label_venue: escapeHtml(labels.venue),
+        locale: escapeHtml(locale),
+    };
+
+    let documentHtml = sourceHtml;
+
+    Object.entries(replacements).forEach(([key, value]) => {
+        documentHtml = documentHtml.split(`{{${key}}}`).join(value);
+    });
+
+    documentHtml = injectFontLink(documentHtml, state.fontFamily);
+
+    return setHtmlLanguage(documentHtml, locale);
+}
+
 function generateHtmlDocument(state, template, locale, dictionary) {
+    if (template.htmlSource) {
+        return renderUploadedHtmlTemplate(template.htmlSource, state, locale, dictionary);
+    }
+
     const fontLink = fontLinks[state.fontFamily] ?? fontLinks.Sora;
     const previewGradient = template.designTokens?.catalog_background
         ?? 'linear-gradient(135deg, #eff6ff, #dbeafe, #c7d2fe)';

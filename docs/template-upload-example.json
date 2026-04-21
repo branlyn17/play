@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "style": {
+    "accentColor": "#4f7cff",
+    "backgroundColor": "#eef6ff",
+    "surfaceColor": "#ffffff",
+    "textColor": "#152033",
+    "fontFamily": "Sora"
+  },
+  "locales": {
+    "es": {
+      "catalog": {
+        "name": "Boda cielo moderno",
+        "slug": "boda-cielo-moderno",
+        "teaser": "Una invitacion clara, elegante y luminosa para bodas modernas.",
+        "description": "Template de boda con fondo azul claro, tarjeta limpia, detalles suaves y contenido editable para los datos principales del evento.",
+        "seo_title": "Invitacion digital de boda cielo moderno",
+        "seo_description": "Crea una invitacion digital de boda moderna con estilo claro, elegante y personalizable."
+      },
+      "content": {
+        "eventLabel": "Boda",
+        "headline": "Una historia que empieza para siempre",
+        "subheadline": "Celebra con nosotros una noche llena de amor, musica y momentos inolvidables.",
+        "hosts": "Ana y Luis",
+        "dateLabel": "Sabado 18 de julio de 2026",
+        "timeLabel": "07:30 PM",
+        "venueLabel": "Jardin Aurora, Santa Cruz",
+        "message": "Nos encantaria compartir este dia tan especial contigo. Tu presencia hara que nuestra celebracion sea aun mas memorable.",
+        "closing": "Gracias por acompanarnos en este nuevo comienzo.",
+        "buttonLabel": "Confirmar asistencia"
+      },
+      "dictionary": {
+        "hosts": "Anfitriones",
+        "date": "Fecha",
+        "time": "Hora",
+        "venue": "Lugar"
+      }
+    },
+    "en": {
+      "catalog": {
+        "name": "Modern sky wedding",
+        "slug": "modern-sky-wedding",
+        "teaser": "A bright, elegant invitation for modern weddings.",
+        "description": "Wedding template with a light blue background, clean card layout, soft details and editable content for the main event information.",
+        "seo_title": "Modern sky digital wedding invitation",
+        "seo_description": "Create a modern digital wedding invitation with a bright, elegant and customizable style."
+      },
+      "content": {
+        "eventLabel": "Wedding",
+        "headline": "A story that begins forever",
+        "subheadline": "Celebrate with us an evening full of love, music and unforgettable moments.",
+        "hosts": "Anna and Luis",
+        "dateLabel": "Saturday, July 18, 2026",
+        "timeLabel": "07:30 PM",
+        "venueLabel": "Aurora Garden, Santa Cruz",
+        "message": "We would love to share this special day with you. Your presence will make our celebration even more memorable.",
+        "closing": "Thank you for joining us in this new beginning.",
+        "buttonLabel": "Confirm attendance"
+      },
+      "dictionary": {
+        "hosts": "Hosts",
+        "date": "Date",
+        "time": "Time",
+        "venue": "Venue"
+      }
+    }
+  }
+}
