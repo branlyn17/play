@@ -63,7 +63,7 @@
                 <table class="min-w-full divide-y divide-[color:var(--admin-border)]">
                     <thead class="bg-[color:var(--admin-surface-soft)]">
                         <tr>
-                            @foreach (['name', 'code', 'category', 'status', 'metrics'] as $column)
+                            @foreach (['name', 'code', 'category', 'status', 'metrics', 'actions'] as $column)
                                 <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--admin-muted)]">
                                     {{ trans("admin.templates.columns.{$column}") }}
                                 </th>
@@ -128,10 +128,32 @@
                                         </div>
                                     </div>
                                 </td>
+                                <td class="px-5 py-4 align-top">
+                                    <div class="flex min-w-[12rem] flex-wrap gap-2">
+                                        <a
+                                            href="{{ route('admin.templates.edit', array_merge(['template' => $template], request()->has('lang') ? ['lang' => request()->query('lang')] : [])) }}"
+                                            class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-[color:var(--admin-primary)] px-3 text-xs font-semibold text-white transition hover:brightness-110"
+                                        >
+                                            {{ trans('admin.templates.actions.edit') }}
+                                        </a>
+                                        <a
+                                            href="{{ route('admin.templates.download-html', array_merge(['template' => $template], request()->has('lang') ? ['lang' => request()->query('lang')] : [])) }}"
+                                            class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-soft)] px-3 text-xs font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]"
+                                        >
+                                            HTML
+                                        </a>
+                                        <a
+                                            href="{{ route('admin.templates.download-json', array_merge(['template' => $template], request()->has('lang') ? ['lang' => request()->query('lang')] : [])) }}"
+                                            class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-soft)] px-3 text-xs font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]"
+                                        >
+                                            JSON
+                                        </a>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-5 py-14 text-center">
+                                <td colspan="6" class="px-5 py-14 text-center">
                                     <p class="text-lg font-semibold text-[color:var(--admin-text)]">{{ trans('admin.templates.empty_title') }}</p>
                                     <p class="mt-2 text-sm text-[color:var(--admin-text-soft)]">{{ trans('admin.templates.empty_text') }}</p>
                                 </td>

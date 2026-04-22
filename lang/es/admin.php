@@ -216,6 +216,22 @@ return [
             ],
             'json_contract_help' => 'El JSON debe incluir version, style, visibility y locales. Cada idioma debe tener catalog, content, dictionary y puede incluir media.',
         ],
+        'edit' => [
+            'breadcrumb' => 'Editar plantilla',
+            'title' => 'Editar plantilla',
+            'subtitle' => 'Descarga los archivos fuente, actualizalos y vuelve a subirlos para reemplazar el diseno o el contenido traducible.',
+            'back' => 'Volver al listado',
+            'submit' => 'Actualizar plantilla',
+            'base_help' => 'El codigo interno se mantiene estable. Puedes ajustar categoria, orden, estado, apariencia del catalogo y reemplazar archivos fuente.',
+            'replace_help' => 'Sube nuevos archivos solo si quieres reemplazarlos. Si dejas un archivo vacio, se conserva el actual.',
+            'download_html' => 'Descargar HTML',
+            'download_json' => 'Descargar JSON',
+            'downloads_title' => 'Archivos actuales',
+            'downloads_help' => 'El HTML contiene la estructura visual con placeholders. El JSON se exporta desde la base de datos para reflejar traducciones, estilos, visibilidad, contenido y media actuales.',
+            'flash' => [
+                'updated' => 'La plantilla :name fue actualizada correctamente.',
+            ],
+        ],
         'search_placeholder' => 'Buscar por nombre, slug o codigo...',
         'search_action' => 'Buscar',
         'table_title' => 'Listado de plantillas',
@@ -230,6 +246,10 @@ return [
             'category' => 'Categoria',
             'status' => 'Estado',
             'metrics' => 'Metricas',
+            'actions' => 'Acciones',
+        ],
+        'actions' => [
+            'edit' => 'Editar',
         ],
         'badges' => [
             'active' => 'Activa',

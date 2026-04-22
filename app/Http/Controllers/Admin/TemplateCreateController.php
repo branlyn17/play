@@ -7,11 +7,13 @@ use App\Models\InvitationCategory;
 use App\Models\Template;
 use App\Models\TemplateTranslation;
 use App\Support\Templates\TemplateFieldCatalog;
+use App\Support\Templates\TemplatePayloadExporter;
 use App\Support\Templates\TemplatePreviewGenerator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -21,6 +23,7 @@ class TemplateCreateController extends Controller
 {
     public function __construct(
         private readonly TemplatePreviewGenerator $previewGenerator,
+        private readonly TemplatePayloadExporter $payloadExporter,
     ) {}
 
     public function create(): View
@@ -57,34 +60,8 @@ class TemplateCreateController extends Controller
         ];
 
         $validated = $request->validate($rules);
-        $extension = Str::lower((string) $request->file('source_html')->getClientOriginalExtension());
-        $payloadExtension = Str::lower((string) $request->file('source_payload')->getClientOriginalExtension());
-
-        if (! in_array($extension, ['html', 'htm'], true)) {
-            throw ValidationException::withMessages([
-                'source_html' => trans('admin.templates.create.validation.extension'),
-            ]);
-        }
-
-        if ($payloadExtension !== 'json') {
-            throw ValidationException::withMessages([
-                'source_payload' => trans('admin.templates.create.validation.json_extension'),
-            ]);
-        }
-
-        $uploadedHtml = $request->file('source_html')->get();
-        $missingPlaceholders = collect(TemplateFieldCatalog::requiredPlaceholders())
-            ->reject(fn (string $placeholder) => Str::contains($uploadedHtml, $placeholder))
-            ->values()
-            ->all();
-
-        if ($missingPlaceholders !== []) {
-            throw ValidationException::withMessages([
-                'source_html' => trans('admin.templates.create.validation.placeholders', [
-                    'placeholders' => implode(', ', $missingPlaceholders),
-                ]),
-            ]);
-        }
+        $this->validateHtmlFile($request, required: true);
+        $this->validateJsonFile($request, required: true);
 
         $payload = $this->validatedPayload($request, $locales);
 
@@ -165,7 +142,153 @@ class TemplateCreateController extends Controller
             ->with('status', trans('admin.templates.create.flash.created', ['name' => $template->code]));
     }
 
-    private function validatedPayload(Request $request, array $locales): array
+    public function edit(Template $template): View
+    {
+        $template->load(['translations', 'category.translations']);
+
+        return view('admin.templates.edit', [
+            'template' => $template,
+            'title' => trans('admin.templates.edit.title').' | Invita Plus',
+            'locales' => config('locales.supported', []),
+            'categories' => InvitationCategory::query()
+                ->with(['translations' => fn ($query) => $query->where('locale', app()->getLocale())])
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get(),
+            'colorTokens' => TemplateFieldCatalog::availableColorTokens(),
+            'requiredPlaceholders' => TemplateFieldCatalog::requiredPlaceholders(),
+            'optionalPlaceholders' => TemplateFieldCatalog::optionalPlaceholders(),
+        ]);
+    }
+
+    public function update(Request $request, Template $template): RedirectResponse
+    {
+        $locales = array_keys(config('locales.supported', []));
+        $rules = [
+            'category_key' => ['required', 'exists:invitation_categories,key'],
+            'sort_order' => ['nullable', 'integer', 'min:1'],
+            'catalog_accent' => ['required', Rule::in(TemplateFieldCatalog::availableColorTokens())],
+            'catalog_background' => ['required', 'string'],
+            'source_html' => ['nullable', 'file'],
+            'source_payload' => ['nullable', 'file'],
+            'is_active' => ['nullable', 'boolean'],
+            'is_featured' => ['nullable', 'boolean'],
+            'is_premium' => ['nullable', 'boolean'],
+        ];
+
+        $validated = $request->validate($rules);
+        $this->validateHtmlFile($request, required: false);
+        $this->validateJsonFile($request, required: false);
+
+        $payload = $request->hasFile('source_payload')
+            ? $this->validatedPayload($request, $locales, $template)
+            : null;
+
+        $storedHtmlPath = $template->source_html_path;
+
+        if ($request->hasFile('source_html')) {
+            $storedHtmlPath = $request->file('source_html')->storeAs(
+                'templates/'.$template->code,
+                'index.html',
+            );
+        }
+
+        if ($request->hasFile('source_payload')) {
+            $request->file('source_payload')->storeAs(
+                'templates/'.$template->code,
+                'template.json',
+            );
+        }
+
+        DB::transaction(function () use ($template, $validated, $payload, $locales, $storedHtmlPath) {
+            $update = [
+                'invitation_category_id' => InvitationCategory::query()->where('key', $validated['category_key'])->value('id'),
+                'source_html_path' => $storedHtmlPath,
+                'design_tokens' => [
+                    'accent' => $validated['catalog_accent'],
+                    'catalog_background' => $validated['catalog_background'],
+                ],
+                'is_active' => (bool) ($validated['is_active'] ?? false),
+                'is_featured' => (bool) ($validated['is_featured'] ?? false),
+                'is_premium' => (bool) ($validated['is_premium'] ?? false),
+                'sort_order' => $validated['sort_order'] ?? $template->sort_order,
+                'published_at' => ($validated['is_active'] ?? false) ? ($template->published_at ?? now()) : null,
+            ];
+
+            if ($payload) {
+                $update['editor_schema'] = TemplateFieldCatalog::editorSchema();
+                $update['default_content'] = [
+                    'shared' => [
+                        'style' => $payload['style'],
+                        'visibility' => $payload['visibility'],
+                    ],
+                    'locales' => collect($locales)->mapWithKeys(function (string $locale) use ($payload) {
+                        return [
+                            $locale => [
+                                'content' => $payload['locales'][$locale]['content'],
+                                'dictionary' => [
+                                    'labels' => $payload['locales'][$locale]['dictionary'],
+                                ],
+                                'media' => $payload['locales'][$locale]['media'],
+                            ],
+                        ];
+                    })->all(),
+                ];
+                $update['available_fonts'] = TemplateFieldCatalog::availableFonts();
+                $update['available_colors'] = TemplateFieldCatalog::availableColorTokens();
+            }
+
+            $template->update($update);
+
+            if ($payload) {
+                foreach ($locales as $locale) {
+                    TemplateTranslation::updateOrCreate(
+                        [
+                            'template_id' => $template->id,
+                            'locale' => $locale,
+                        ],
+                        [
+                            'name' => $payload['locales'][$locale]['catalog']['name'],
+                            'slug' => $payload['locales'][$locale]['catalog']['slug'],
+                            'teaser' => $payload['locales'][$locale]['catalog']['teaser'],
+                            'description' => $payload['locales'][$locale]['catalog']['description'],
+                            'seo_title' => $payload['locales'][$locale]['catalog']['seo_title'] ?? null,
+                            'seo_description' => $payload['locales'][$locale]['catalog']['seo_description'] ?? null,
+                        ],
+                    );
+                }
+            }
+        });
+
+        $this->previewGenerator->generate($template->fresh(['translations', 'category.translations']), $template->default_locale, true);
+
+        return redirect()
+            ->route('admin.templates.index', request()->has('lang') ? ['lang' => request()->query('lang')] : [])
+            ->with('status', trans('admin.templates.edit.flash.updated', ['name' => $template->code]));
+    }
+
+    public function downloadHtml(Template $template)
+    {
+        return Response::streamDownload(function () use ($template) {
+            echo $this->payloadExporter->sourceHtml($template);
+        }, $template->code.'.html', [
+            'Content-Type' => 'text/html; charset=UTF-8',
+        ]);
+    }
+
+    public function downloadJson(Template $template)
+    {
+        return Response::streamDownload(function () use ($template) {
+            echo json_encode(
+                $this->payloadExporter->payload($template),
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
+            );
+        }, $template->code.'.json', [
+            'Content-Type' => 'application/json; charset=UTF-8',
+        ]);
+    }
+
+    private function validatedPayload(Request $request, array $locales, ?Template $template = null): array
     {
         $payload = json_decode($request->file('source_payload')->get(), true);
 
@@ -203,13 +326,19 @@ class TemplateCreateController extends Controller
         }
 
         foreach ($locales as $locale) {
+            $translationId = $template
+                ? $template->translations()->where('locale', $locale)->value('id')
+                : null;
+
             $rules["locales.{$locale}"] = ['required', 'array'];
             $rules["locales.{$locale}.catalog.name"] = ['required', 'string', 'max:120'];
             $rules["locales.{$locale}.catalog.slug"] = [
                 'required',
                 'alpha_dash',
                 'max:160',
-                Rule::unique('template_translations', 'slug')->where(fn ($query) => $query->where('locale', $locale)),
+                Rule::unique('template_translations', 'slug')
+                    ->where(fn ($query) => $query->where('locale', $locale))
+                    ->ignore($translationId),
             ];
             $rules["locales.{$locale}.catalog.teaser"] = ['required', 'string', 'max:255'];
             $rules["locales.{$locale}.catalog.description"] = ['required', 'string'];
@@ -248,6 +377,62 @@ class TemplateCreateController extends Controller
         }
 
         return $this->normalizePayload(Validator::make($payload, $rules)->validate(), $locales);
+    }
+
+    private function validateHtmlFile(Request $request, bool $required): void
+    {
+        if (! $request->hasFile('source_html')) {
+            if ($required) {
+                throw ValidationException::withMessages([
+                    'source_html' => trans('validation.required', ['attribute' => trans('admin.templates.create.fields.html_file')]),
+                ]);
+            }
+
+            return;
+        }
+
+        $extension = Str::lower((string) $request->file('source_html')->getClientOriginalExtension());
+
+        if (! in_array($extension, ['html', 'htm'], true)) {
+            throw ValidationException::withMessages([
+                'source_html' => trans('admin.templates.create.validation.extension'),
+            ]);
+        }
+
+        $uploadedHtml = $request->file('source_html')->get();
+        $missingPlaceholders = collect(TemplateFieldCatalog::requiredPlaceholders())
+            ->reject(fn (string $placeholder) => Str::contains($uploadedHtml, $placeholder))
+            ->values()
+            ->all();
+
+        if ($missingPlaceholders !== []) {
+            throw ValidationException::withMessages([
+                'source_html' => trans('admin.templates.create.validation.placeholders', [
+                    'placeholders' => implode(', ', $missingPlaceholders),
+                ]),
+            ]);
+        }
+    }
+
+    private function validateJsonFile(Request $request, bool $required): void
+    {
+        if (! $request->hasFile('source_payload')) {
+            if ($required) {
+                throw ValidationException::withMessages([
+                    'source_payload' => trans('validation.required', ['attribute' => trans('admin.templates.create.fields.json_file')]),
+                ]);
+            }
+
+            return;
+        }
+
+        $payloadExtension = Str::lower((string) $request->file('source_payload')->getClientOriginalExtension());
+
+        if ($payloadExtension !== 'json') {
+            throw ValidationException::withMessages([
+                'source_payload' => trans('admin.templates.create.validation.json_extension'),
+            ]);
+        }
     }
 
     private function normalizePayload(array $payload, array $locales): array

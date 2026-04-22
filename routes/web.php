@@ -30,6 +30,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/templates', TemplateIndexController::class)->name('templates.index');
             Route::get('/templates/create', [TemplateCreateController::class, 'create'])->name('templates.create');
             Route::post('/templates', [TemplateCreateController::class, 'store'])->name('templates.store');
+            Route::get('/templates/{template}/edit', [TemplateCreateController::class, 'edit'])->name('templates.edit');
+            Route::put('/templates/{template}', [TemplateCreateController::class, 'update'])->name('templates.update');
+            Route::get('/templates/{template}/download/html', [TemplateCreateController::class, 'downloadHtml'])->name('templates.download-html');
+            Route::get('/templates/{template}/download/json', [TemplateCreateController::class, 'downloadJson'])->name('templates.download-json');
 
             Route::get('/template-categories', [TemplateCategoryController::class, 'index'])->name('template-categories.index');
             Route::get('/template-categories/create', [TemplateCategoryController::class, 'create'])->name('template-categories.create');

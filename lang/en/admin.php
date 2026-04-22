@@ -216,6 +216,22 @@ return [
             ],
             'json_contract_help' => 'The JSON must include version, style, visibility and locales. Each locale must contain catalog, content, dictionary and may include media.',
         ],
+        'edit' => [
+            'breadcrumb' => 'Edit template',
+            'title' => 'Edit template',
+            'subtitle' => 'Download the source files, update them and upload them again to replace the design or translatable content.',
+            'back' => 'Back to list',
+            'submit' => 'Update template',
+            'base_help' => 'The internal code remains stable. You can adjust category, order, state, catalog appearance and replace source files.',
+            'replace_help' => 'Upload new files only when you want to replace them. If a file is empty, the current one is kept.',
+            'download_html' => 'Download HTML',
+            'download_json' => 'Download JSON',
+            'downloads_title' => 'Current files',
+            'downloads_help' => 'The HTML contains the visual structure with placeholders. The JSON is exported from the database so it reflects current translations, styles, visibility, content and media.',
+            'flash' => [
+                'updated' => 'Template :name was updated successfully.',
+            ],
+        ],
         'search_placeholder' => 'Search by name, slug or code...',
         'search_action' => 'Search',
         'table_title' => 'Template list',
@@ -230,6 +246,10 @@ return [
             'category' => 'Category',
             'status' => 'Status',
             'metrics' => 'Metrics',
+            'actions' => 'Actions',
+        ],
+        'actions' => [
+            'edit' => 'Edit',
         ],
         'badges' => [
             'active' => 'Active',
