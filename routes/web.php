@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\TemplateCategoryController;
 use App\Http\Controllers\Admin\TemplateCreateController;
 use App\Http\Controllers\Admin\TemplateIndexController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -25,9 +26,17 @@ Route::middleware('auth')->group(function () {
         ->name('admin.')
         ->group(function () {
             Route::get('/', DashboardController::class)->name('dashboard');
+
             Route::get('/templates', TemplateIndexController::class)->name('templates.index');
             Route::get('/templates/create', [TemplateCreateController::class, 'create'])->name('templates.create');
             Route::post('/templates', [TemplateCreateController::class, 'store'])->name('templates.store');
+
+            Route::get('/template-categories', [TemplateCategoryController::class, 'index'])->name('template-categories.index');
+            Route::get('/template-categories/create', [TemplateCategoryController::class, 'create'])->name('template-categories.create');
+            Route::post('/template-categories', [TemplateCategoryController::class, 'store'])->name('template-categories.store');
+            Route::get('/template-categories/{templateCategory}/edit', [TemplateCategoryController::class, 'edit'])->name('template-categories.edit');
+            Route::put('/template-categories/{templateCategory}', [TemplateCategoryController::class, 'update'])->name('template-categories.update');
+            Route::delete('/template-categories/{templateCategory}', [TemplateCategoryController::class, 'destroy'])->name('template-categories.destroy');
         });
 });
 

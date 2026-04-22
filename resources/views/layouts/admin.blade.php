@@ -154,8 +154,11 @@
             $sidebarItemRoutes = [
                 'dashboard' => route('admin.dashboard', $adminRouteQuery),
                 'templates' => route('admin.templates.index', $adminRouteQuery),
+                'catalog' => route('admin.template-categories.index', $adminRouteQuery),
             ];
-            $activeSidebarItem = request()->routeIs('admin.templates.*') ? 'templates' : 'dashboard';
+            $activeSidebarItem = request()->routeIs('admin.templates.*')
+                ? 'templates'
+                : (request()->routeIs('admin.template-categories.*') ? 'catalog' : 'dashboard');
         @endphp
 
         <script>
