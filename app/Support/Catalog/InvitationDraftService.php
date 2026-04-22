@@ -5,6 +5,7 @@ namespace App\Support\Catalog;
 use App\Models\Event;
 use App\Models\Invitation;
 use App\Models\Template;
+use App\Support\Templates\TemplateMetricTracker;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -57,7 +58,7 @@ class InvitationDraftService
                 'style_overrides' => $parts['style'],
             ]);
 
-            $template->increment('use_count');
+            TemplateMetricTracker::recordUse($template, $invitation);
             self::syncMediaItems($invitation, $parts['media']);
 
             return $invitation;
@@ -90,12 +91,6 @@ class InvitationDraftService
         if ($downloaded) {
             $invitation->status = 'published';
             $invitation->published_at ??= now();
-            $invitation->last_downloaded_at = now();
-            $invitation->download_count++;
-
-            if ($invitation->template) {
-                $invitation->template->increment('download_count');
-            }
         }
 
         $invitation->save();
@@ -111,6 +106,10 @@ class InvitationDraftService
             'location_url' => $editorState['googleMapsUrl'] ?? null,
         ]);
         self::syncMediaItems($invitation, $parts['media']);
+
+        if ($downloaded) {
+            $invitation = TemplateMetricTracker::recordDownload($invitation);
+        }
 
         return $invitation->fresh(['template']);
     }

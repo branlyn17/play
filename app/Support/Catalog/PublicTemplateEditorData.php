@@ -6,6 +6,7 @@ use App\Models\Invitation;
 use App\Models\Template;
 use App\Models\TemplateTranslation;
 use App\Support\Localization\PublicPage;
+use App\Support\Templates\TemplateMetricTracker;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
@@ -54,8 +55,7 @@ class PublicTemplateEditorData
     {
         $fallbackLocale = config('locales.fallback', 'en');
 
-        $template->increment('view_count');
-        $template->refresh();
+        $template = TemplateMetricTracker::recordView($template, $invitation);
         $template->loadMissing(['translations', 'category.translations']);
 
         $resolvedTranslation = self::resolveTranslation($template->translations, $locale, $fallbackLocale);

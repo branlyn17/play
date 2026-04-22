@@ -45,3 +45,23 @@ Artisan::command('templates:generate-previews {code? : Template code to regenera
 
     return Command::SUCCESS;
 })->purpose('Generate public preview images for invitation templates');
+
+Artisan::command('templates:sync-metrics', function () {
+    $templates = Template::query()
+        ->withCount('invitations')
+        ->withSum('invitations as invitations_view_count', 'view_count')
+        ->withSum('invitations as invitations_download_count', 'download_count')
+        ->get();
+
+    foreach ($templates as $template) {
+        $template->forceFill([
+            'view_count' => (int) ($template->invitations_view_count ?? 0),
+            'download_count' => (int) ($template->invitations_download_count ?? 0),
+            'use_count' => (int) $template->invitations_count,
+        ])->save();
+    }
+
+    $this->info("Synced metrics for {$templates->count()} templates.");
+
+    return Command::SUCCESS;
+})->purpose('Synchronize template counters from real invitation activity');

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\TemplateCategoryController;
+use App\Http\Controllers\Admin\TemplateAnalyticsController;
 use App\Http\Controllers\Admin\TemplateCreateController;
 use App\Http\Controllers\Admin\TemplateIndexController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -41,6 +42,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/template-categories/{templateCategory}/edit', [TemplateCategoryController::class, 'edit'])->name('template-categories.edit');
             Route::put('/template-categories/{templateCategory}', [TemplateCategoryController::class, 'update'])->name('template-categories.update');
             Route::delete('/template-categories/{templateCategory}', [TemplateCategoryController::class, 'destroy'])->name('template-categories.destroy');
+
+            Route::get('/template-analytics', TemplateAnalyticsController::class)->name('template-analytics.index');
         });
 });
 

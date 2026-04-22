@@ -56,4 +56,14 @@ class Template extends Model
     {
         return $this->hasMany(Invitation::class);
     }
+
+    public function metricEvents()
+    {
+        return $this->hasMany(TemplateMetricEvent::class);
+    }
+
+    public function metricDailySummaries()
+    {
+        return $this->hasMany(TemplateMetricDailySummary::class);
+    }
 }

@@ -75,6 +75,11 @@
                             @php
                                 $translation = $template->translations->first();
                                 $categoryTranslation = $template->category?->translations->first();
+                                $templateMetrics = [
+                                    ['label' => trans('admin.templates.metrics.views'), 'value' => $template->view_count],
+                                    ['label' => trans('admin.templates.metrics.downloads'), 'value' => $template->download_count],
+                                    ['label' => trans('admin.templates.metrics.uses'), 'value' => $template->use_count],
+                                ];
                             @endphp
                             <tr class="bg-transparent transition hover:bg-[color:var(--admin-surface-soft)]">
                                 <td class="px-5 py-4 align-top">
@@ -113,19 +118,13 @@
                                     </div>
                                 </td>
                                 <td class="px-5 py-4 align-top">
-                                    <div class="grid min-w-[11rem] grid-cols-3 gap-2 text-sm">
-                                        <div class="rounded-[1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-soft)] px-3 py-2">
-                                            <p class="text-xs uppercase tracking-[0.16em] text-[color:var(--admin-muted)]">{{ trans('admin.templates.metrics.views') }}</p>
-                                            <p class="mt-1 font-semibold text-[color:var(--admin-text)]">{{ number_format($template->view_count) }}</p>
-                                        </div>
-                                        <div class="rounded-[1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-soft)] px-3 py-2">
-                                            <p class="text-xs uppercase tracking-[0.16em] text-[color:var(--admin-muted)]">{{ trans('admin.templates.metrics.downloads') }}</p>
-                                            <p class="mt-1 font-semibold text-[color:var(--admin-text)]">{{ number_format($template->download_count) }}</p>
-                                        </div>
-                                        <div class="rounded-[1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-soft)] px-3 py-2">
-                                            <p class="text-xs uppercase tracking-[0.16em] text-[color:var(--admin-muted)]">{{ trans('admin.templates.metrics.uses') }}</p>
-                                            <p class="mt-1 font-semibold text-[color:var(--admin-text)]">{{ number_format($template->use_count) }}</p>
-                                        </div>
+                                    <div class="min-w-[15rem] rounded-[1.25rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-soft)] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                                        @foreach ($templateMetrics as $metric)
+                                            <div class="flex items-center justify-between gap-4 rounded-[0.95rem] px-3 py-2 transition hover:bg-[color:var(--admin-surface)]">
+                                                <span class="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--admin-muted)]">{{ $metric['label'] }}</span>
+                                                <span class="text-sm font-semibold tabular-nums text-[color:var(--admin-text)]">{{ number_format((int) $metric['value']) }}</span>
+                                            </div>
+                                        @endforeach
                                     </div>
                                 </td>
                                 <td class="px-5 py-4 align-top">

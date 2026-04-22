@@ -135,7 +135,7 @@
             $localeQuery = request()->query();
             $sidebarSections = [
                 ['key' => 'overview', 'icon' => 'grid', 'items' => ['dashboard'], 'expanded' => true],
-                ['key' => 'catalog', 'icon' => 'cube', 'items' => ['templates', 'catalog', 'categories', 'plans'], 'expanded' => true],
+                ['key' => 'catalog', 'icon' => 'cube', 'items' => ['templates', 'catalog', 'template_analytics', 'categories', 'plans'], 'expanded' => true],
                 ['key' => 'sales', 'icon' => 'cart', 'items' => ['orders', 'revenue', 'billing'], 'expanded' => false],
                 ['key' => 'operations', 'icon' => 'users', 'items' => ['customers', 'invitations', 'support'], 'expanded' => false],
                 ['key' => 'growth', 'icon' => 'chart', 'items' => ['analytics', 'translations'], 'expanded' => false],
@@ -155,10 +155,13 @@
                 'dashboard' => route('admin.dashboard', $adminRouteQuery),
                 'templates' => route('admin.templates.index', $adminRouteQuery),
                 'catalog' => route('admin.template-categories.index', $adminRouteQuery),
+                'template_analytics' => route('admin.template-analytics.index', $adminRouteQuery),
             ];
             $activeSidebarItem = request()->routeIs('admin.templates.*')
                 ? 'templates'
-                : (request()->routeIs('admin.template-categories.*') ? 'catalog' : 'dashboard');
+                : (request()->routeIs('admin.template-categories.*')
+                    ? 'catalog'
+                    : (request()->routeIs('admin.template-analytics.*') ? 'template_analytics' : 'dashboard'));
         @endphp
 
         <script>

@@ -519,9 +519,9 @@ class TemplateSeeder extends Seeder
                     'is_featured' => $data['is_featured'],
                     'is_premium' => $data['is_premium'],
                     'sort_order' => $data['sort_order'],
-                    'view_count' => $data['view_count'],
-                    'download_count' => $data['download_count'],
-                    'use_count' => $data['use_count'],
+                    'view_count' => $existingTemplate?->view_count ?? 0,
+                    'download_count' => $existingTemplate?->download_count ?? 0,
+                    'use_count' => $existingTemplate?->use_count ?? 0,
                     'published_at' => now(),
                 ],
             );
