@@ -6,6 +6,7 @@ return [
     'welcome' => 'Hola, :name.',
     'subtitle' => 'Un workspace para operar templates, ventas, clientes, metricas e internacionalizacion desde una sola base visual.',
     'theme_toggle' => 'Cambiar tema',
+    'fullscreen_toggle' => 'Alternar pantalla completa',
     'language' => 'Idioma',
     'open_site' => 'Ver sitio',
     'logout' => 'Cerrar sesion',

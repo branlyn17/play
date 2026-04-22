@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-admin-theme="dark" data-admin-sidebar="open">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-admin-theme="dark" data-admin-sidebar="open" data-admin-fullscreen="off">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -109,6 +109,22 @@
                     pointer-events: none;
                 }
             }
+
+            html[data-admin-fullscreen='on'] #admin-page-frame {
+                max-width: none;
+            }
+
+            html[data-admin-fullscreen='on'] #admin-page-frame {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+
+            @media (min-width: 640px) {
+                html[data-admin-fullscreen='on'] #admin-page-frame {
+                    padding-left: 1rem;
+                    padding-right: 1rem;
+                }
+            }
         </style>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -146,13 +162,15 @@
             (function () {
                 const savedTheme = window.localStorage.getItem('invita-plus-admin-theme');
                 const savedSidebar = window.localStorage.getItem('invita-plus-admin-sidebar');
+                const savedFullscreen = window.localStorage.getItem('invita-plus-admin-fullscreen');
                 document.documentElement.dataset.adminTheme = savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : 'dark';
                 document.documentElement.dataset.adminSidebar = savedSidebar === 'closed' ? 'closed' : 'open';
+                document.documentElement.dataset.adminFullscreen = savedFullscreen === 'on' ? 'on' : 'off';
             }());
         </script>
 
         <div class="min-h-screen bg-[var(--admin-overlay)]">
-            <div class="mx-auto max-w-[1800px] px-4 py-4 sm:px-6 lg:px-8">
+            <div id="admin-page-frame" class="mx-auto max-w-[1800px] px-4 py-4 sm:px-6 lg:px-8">
                 <div id="admin-shell" class="relative">
                     <div id="admin-sidebar-backdrop" class="fixed inset-0 z-30 hidden bg-slate-950/60 backdrop-blur-sm lg:hidden"></div>
 
@@ -235,15 +253,20 @@
                     </aside>
 
                     <div id="admin-main" class="min-w-0 space-y-5">
-                        <header data-admin-shell class="rounded-[1.8rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-shell)] p-2.5 shadow-[var(--admin-shadow)] backdrop-blur-2xl sm:p-3">
-                            <div class="flex flex-col gap-2.5 lg:flex-row lg:items-center">
-                                <div class="flex min-w-0 flex-1 items-center gap-3">
+                        <header data-admin-shell class="relative rounded-[1.8rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-shell)] p-2 shadow-[var(--admin-shadow)] backdrop-blur-2xl sm:p-3">
+                            <div class="flex items-center justify-between gap-2 lg:gap-3">
+                                <div class="flex shrink-0 items-center">
                                     <button id="admin-sidebar-toggle" type="button" class="relative z-10 inline-flex h-11 w-11 shrink-0 cursor-pointer select-none items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[linear-gradient(180deg,rgba(79,124,255,0.22),rgba(79,124,255,0.12))] text-[color:var(--admin-primary)] shadow-[0_10px_24px_rgba(79,124,255,0.14)] transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--admin-primary)]/35 hover:bg-[linear-gradient(180deg,rgba(79,124,255,0.28),rgba(79,124,255,0.16))] active:scale-[0.98]" aria-label="{{ trans('admin.sidebar.toggle') }}">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M3 12h18"></path><path d="M3 18h18"></path></svg>
                                     </button>
                                 </div>
 
+                                <div class="hidden min-w-0 flex-1"></div>
+
                                 <div class="hidden shrink-0 items-center gap-2 lg:flex">
+                                    <button id="admin-fullscreen-toggle" type="button" class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]" aria-label="{{ trans('admin.fullscreen_toggle') }}">
+                                        <span id="admin-fullscreen-icon" aria-hidden="true"></span>
+                                    </button>
                                     <div class="relative" data-admin-locale-wrap>
                                         <button id="admin-locale-toggle-desktop" type="button" class="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-3 text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]" aria-label="{{ trans('admin.language') }}">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"></path></svg>
@@ -264,7 +287,10 @@
                                     </div>
                                 </div>
 
-                                <div class="flex w-full items-center justify-end gap-2 lg:hidden">
+                                <div class="flex min-w-0 shrink-0 items-center justify-end gap-2 lg:hidden">
+                                    <button id="admin-fullscreen-toggle-mobile" type="button" class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]" aria-label="{{ trans('admin.fullscreen_toggle') }}">
+                                        <span id="admin-fullscreen-icon-mobile" aria-hidden="true"></span>
+                                    </button>
                                     <div class="relative" data-admin-locale-wrap>
                                         <button id="admin-locale-toggle" type="button" class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]" aria-label="{{ trans('admin.language') }}">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"></path></svg>
@@ -330,6 +356,10 @@
                 const themeButtonMobile = document.getElementById('admin-theme-toggle-mobile');
                 const themeIcon = document.getElementById('admin-theme-icon');
                 const themeIconMobile = document.getElementById('admin-theme-icon-mobile');
+                const fullscreenButton = document.getElementById('admin-fullscreen-toggle');
+                const fullscreenButtonMobile = document.getElementById('admin-fullscreen-toggle-mobile');
+                const fullscreenIcon = document.getElementById('admin-fullscreen-icon');
+                const fullscreenIconMobile = document.getElementById('admin-fullscreen-icon-mobile');
                 const localeMenu = document.getElementById('admin-locale-menu');
                 const localeToggleDesktop = document.getElementById('admin-locale-toggle-desktop');
                 const localeToggleMobile = document.getElementById('admin-locale-toggle');
@@ -338,6 +368,7 @@
                 const profileToggleMobile = document.getElementById('admin-profile-toggle-mobile');
                 const desktopQuery = window.matchMedia('(min-width: 1024px)');
                 const sidebarStorageKey = 'invita-plus-admin-sidebar';
+                const fullscreenStorageKey = 'invita-plus-admin-fullscreen';
                 const headerShell = document.querySelector('[data-admin-shell]');
                 const localeButtons = [localeToggleDesktop, localeToggleMobile].filter(Boolean);
                 const profileButtons = [profileToggleDesktop, profileToggleMobile].filter(Boolean);
@@ -351,10 +382,48 @@
                     if (themeIconMobile) themeIconMobile.innerHTML = icon;
                 }
 
+                function renderFullscreenIcon(isFullscreen) {
+                    const icon = isFullscreen
+                        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"></path><path d="M21 8h-3a2 2 0 0 1-2-2V3"></path><path d="M3 16h3a2 2 0 0 1 2 2v3"></path><path d="M16 21v-3a2 2 0 0 1 2-2h3"></path></svg>'
+                        : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>';
+
+                    if (fullscreenIcon) fullscreenIcon.innerHTML = icon;
+                    if (fullscreenIconMobile) fullscreenIconMobile.innerHTML = icon;
+                }
+
                 function applyTheme(theme) {
                     root.dataset.adminTheme = theme;
                     window.localStorage.setItem('invita-plus-admin-theme', theme);
                     renderThemeIcon(theme);
+                }
+
+                function applyFullscreenPreference(isFullscreen) {
+                    root.dataset.adminFullscreen = isFullscreen ? 'on' : 'off';
+                    window.localStorage.setItem(fullscreenStorageKey, isFullscreen ? 'on' : 'off');
+                    renderFullscreenIcon(isFullscreen);
+                }
+
+                async function toggleFullscreen() {
+                    try {
+                        if (document.fullscreenElement) {
+                            await document.exitFullscreen();
+                            applyFullscreenPreference(false);
+                            return;
+                        }
+
+                        if (root.dataset.adminFullscreen === 'on') {
+                            applyFullscreenPreference(false);
+                            return;
+                        }
+
+                        if (document.documentElement.requestFullscreen) {
+                            await document.documentElement.requestFullscreen();
+                        }
+
+                        applyFullscreenPreference(true);
+                    } catch (error) {
+                        applyFullscreenPreference(root.dataset.adminFullscreen !== 'on');
+                    }
                 }
 
                 function setDesktopSidebarState(open) {
@@ -405,12 +474,23 @@
 
                 applyTheme(window.localStorage.getItem('invita-plus-admin-theme') || 'dark');
                 setDesktopSidebarState(window.localStorage.getItem(sidebarStorageKey) !== 'closed');
+                applyFullscreenPreference(window.localStorage.getItem(fullscreenStorageKey) === 'on');
                 syncMobileSidebar();
 
                 [themeButton, themeButtonMobile].forEach(function (button) {
                     button?.addEventListener('click', function () {
                         applyTheme(root.dataset.adminTheme === 'dark' ? 'light' : 'dark');
                     });
+                });
+
+                [fullscreenButton, fullscreenButtonMobile].forEach(function (button) {
+                    button?.addEventListener('click', function () {
+                        toggleFullscreen();
+                    });
+                });
+
+                document.addEventListener('fullscreenchange', function () {
+                    renderFullscreenIcon(Boolean(document.fullscreenElement) || root.dataset.adminFullscreen === 'on');
                 });
 
                 function handleSidebarToggle(event) {
