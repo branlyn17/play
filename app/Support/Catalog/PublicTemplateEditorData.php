@@ -40,6 +40,7 @@ class PublicTemplateEditorData
             return Invitation::query()
                 ->where('edit_token', $editToken)
                 ->with([
+                    'mediaItems',
                     'template.translations',
                     'template.category.translations',
                 ])
@@ -92,10 +93,13 @@ class PublicTemplateEditorData
                 'defaultContent' => [
                     'content' => $blueprint['contentDefaults'],
                     'style' => $blueprint['styleDefaults'],
+                    'visibility' => $blueprint['visibilityDefaults'],
+                    'media' => $blueprint['mediaDefaults'],
                     'resolvedLocale' => $blueprint['resolvedLocale'],
                 ],
                 'dictionary' => $blueprint['dictionary'],
                 'savedState' => $invitation?->editor_state ?? [],
+                'savedMedia' => self::mediaItemsForEditor($invitation),
             ],
             'locales' => self::localeOptionsForTemplate($template, $invitation),
         ];
@@ -132,5 +136,36 @@ class PublicTemplateEditorData
         return $translations->firstWhere('locale', $locale)
             ?? $translations->firstWhere('locale', $fallbackLocale)
             ?? $translations->first();
+    }
+
+    protected static function mediaItemsForEditor(?Invitation $invitation): array
+    {
+        if (! $invitation) {
+            return [];
+        }
+
+        $items = $invitation->relationLoaded('mediaItems')
+            ? $invitation->mediaItems
+            : $invitation->mediaItems()->get();
+
+        return [
+            'hero' => optional($items->firstWhere('role', 'hero'), fn ($item) => [
+                'url' => $item->url,
+                'alt' => $item->alt_text ?? '',
+            ]) ?? ['url' => '', 'alt' => ''],
+            'background' => optional($items->firstWhere('role', 'background'), fn ($item) => [
+                'url' => $item->url,
+                'alt' => $item->alt_text ?? '',
+            ]) ?? ['url' => '', 'alt' => ''],
+            'gallery' => $items
+                ->where('role', 'gallery')
+                ->values()
+                ->map(fn ($item) => [
+                    'url' => $item->url,
+                    'alt' => $item->alt_text ?? '',
+                    'caption' => $item->caption ?? '',
+                ])
+                ->all(),
+        ];
     }
 }

@@ -8,7 +8,33 @@ const fontLinks = {
     'Cormorant Garamond': 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap',
 };
 
-const multilineFields = new Set(['subheadline', 'message', 'closing']);
+const timezoneOptions = [
+    'America/La_Paz',
+    'America/New_York',
+    'America/Mexico_City',
+    'America/Bogota',
+    'America/Lima',
+    'America/Santiago',
+    'America/Argentina/Buenos_Aires',
+    'America/Santo_Domingo',
+    'Europe/Madrid',
+    'UTC',
+];
+
+const multilineFields = new Set(['subheadline', 'message', 'closing', 'venueAddress']);
+const visibilityDefaults = {
+    showGuestName: true,
+    showEventDetails: true,
+    showLocation: true,
+    showHeroImage: true,
+    showGallery: true,
+};
+
+const emptyMedia = {
+    hero: { url: '', alt: '' },
+    background: { url: '', alt: '' },
+    gallery: [],
+};
 
 function normalizeContent(content = {}) {
     return {
@@ -36,19 +62,66 @@ function normalizeDictionary(dictionary = {}) {
     };
 }
 
+function normalizeVisibility(visibility = {}) {
+    return {
+        ...visibilityDefaults,
+        ...visibility,
+    };
+}
+
+function normalizeMedia(media = {}) {
+    return {
+        hero: {
+            url: media.hero?.url ?? '',
+            alt: media.hero?.alt ?? '',
+        },
+        background: {
+            url: media.background?.url ?? '',
+            alt: media.background?.alt ?? '',
+        },
+        gallery: Array.isArray(media.gallery)
+            ? media.gallery.map((item) => ({
+                url: item?.url ?? '',
+                alt: item?.alt ?? '',
+                caption: item?.caption ?? '',
+            }))
+            : [],
+    };
+}
+
 function buildInitialState(template) {
     const defaults = {
         ...(template.defaultContent?.content ?? {}),
         ...(template.defaultContent?.style ?? {}),
+        _visibility: normalizeVisibility(template.defaultContent?.visibility),
+        _media: normalizeMedia(template.defaultContent?.media ?? emptyMedia),
     };
     const savedState = { ...(template.savedState ?? {}) };
+    const savedMedia = normalizeMedia(template.savedMedia ?? savedState._media ?? defaults._media);
 
     delete savedState._meta;
+    delete savedState._media;
 
-    return {
+    const mergedState = {
         ...defaults,
         ...savedState,
+        _visibility: normalizeVisibility(savedState._visibility ?? defaults._visibility),
+        _media: savedMedia,
     };
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(mergedState.dateLabel ?? ''))) {
+        mergedState.dateLabel = defaults.dateLabel ?? '';
+    }
+
+    if (!/^\d{2}:\d{2}$/.test(String(mergedState.timeLabel ?? ''))) {
+        mergedState.timeLabel = defaults.timeLabel ?? '';
+    }
+
+    if (!timezoneOptions.includes(mergedState.timezoneLabel)) {
+        mergedState.timezoneLabel = defaults.timezoneLabel || 'America/La_Paz';
+    }
+
+    return mergedState;
 }
 
 function getCsrfToken() {
@@ -66,6 +139,88 @@ function escapeHtml(value) {
 
 function formatHtmlText(value) {
     return escapeHtml(value).replace(/\n/g, '<br />');
+}
+
+function formatDateForDisplay(value, locale) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ''))) {
+        return value ?? '';
+    }
+
+    const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+
+    return new Intl.DateTimeFormat(locale, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }).format(date);
+}
+
+function formatTimeForDisplay(value, locale) {
+    if (!/^\d{2}:\d{2}$/.test(String(value ?? ''))) {
+        return value ?? '';
+    }
+
+    const [hour, minute] = value.split(':').map(Number);
+    const date = new Date(2000, 0, 1, hour, minute);
+
+    return new Intl.DateTimeFormat(locale, {
+        hour: 'numeric',
+        minute: '2-digit',
+    }).format(date);
+}
+
+function displayValueForPlaceholder(key, value, locale) {
+    if (key === 'dateLabel') {
+        return formatDateForDisplay(value, locale);
+    }
+
+    if (key === 'timeLabel') {
+        return formatTimeForDisplay(value, locale);
+    }
+
+    return value;
+}
+
+function renderGalleryImagesHtml(media) {
+    return normalizeMedia(media).gallery
+        .filter((item) => item.url)
+        .map((item) => `
+            <figure class="invita-gallery-item">
+                <img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.alt)}" loading="lazy">
+                ${item.caption ? `<figcaption>${escapeHtml(item.caption)}</figcaption>` : ''}
+            </figure>
+        `)
+        .join('');
+}
+
+function applyOptionalSectionVisibility(documentHtml, visibility) {
+    const sectionMap = {
+        guest: 'showGuestName',
+        'event-details': 'showEventDetails',
+        location: 'showLocation',
+        'hero-image': 'showHeroImage',
+        gallery: 'showGallery',
+    };
+
+    if (typeof window.DOMParser === 'undefined') {
+        return documentHtml;
+    }
+
+    const normalizedVisibility = normalizeVisibility(visibility);
+    const parser = new window.DOMParser();
+    const doc = parser.parseFromString(documentHtml, 'text/html');
+
+    Object.entries(sectionMap).forEach(([section, key]) => {
+        if (normalizedVisibility[key]) {
+            return;
+        }
+
+        doc.querySelectorAll(`[data-invita-section="${section}"]`).forEach((element) => element.remove());
+    });
+
+    return `<!doctype html>\n${doc.documentElement.outerHTML}`;
 }
 
 function injectFontLink(documentHtml, fontFamily) {
@@ -101,17 +256,27 @@ function setHtmlLanguage(documentHtml, locale) {
 
 function renderUploadedHtmlTemplate(sourceHtml, state, locale, dictionary) {
     const labels = normalizeDictionary(dictionary).labels;
+    const media = normalizeMedia(state._media);
     const replacements = {
         ...Object.fromEntries(
-            Object.entries(state).map(([key, value]) => [
-                key,
-                multilineFields.has(key) ? formatHtmlText(value) : escapeHtml(value),
-            ]),
+            Object.entries(state)
+                .filter(([, value]) => typeof value !== 'object')
+                .map(([key, value]) => [
+                    key,
+                    multilineFields.has(key)
+                        ? formatHtmlText(displayValueForPlaceholder(key, value, locale))
+                        : escapeHtml(displayValueForPlaceholder(key, value, locale)),
+                ]),
         ),
         label_hosts: escapeHtml(labels.hosts),
         label_date: escapeHtml(labels.date),
         label_time: escapeHtml(labels.time),
         label_venue: escapeHtml(labels.venue),
+        heroImageUrl: escapeHtml(media.hero.url),
+        heroImageAlt: escapeHtml(media.hero.alt),
+        backgroundImageUrl: escapeHtml(media.background.url),
+        backgroundImageAlt: escapeHtml(media.background.alt),
+        galleryImagesHtml: renderGalleryImagesHtml(media),
         locale: escapeHtml(locale),
     };
 
@@ -122,6 +287,7 @@ function renderUploadedHtmlTemplate(sourceHtml, state, locale, dictionary) {
     });
 
     documentHtml = injectFontLink(documentHtml, state.fontFamily);
+    documentHtml = applyOptionalSectionVisibility(documentHtml, state._visibility);
 
     return setHtmlLanguage(documentHtml, locale);
 }
@@ -135,6 +301,11 @@ function generateHtmlDocument(state, template, locale, dictionary) {
     const previewGradient = template.designTokens?.catalog_background
         ?? 'linear-gradient(135deg, #eff6ff, #dbeafe, #c7d2fe)';
     const labels = normalizeDictionary(dictionary).labels;
+    const visibility = normalizeVisibility(state._visibility);
+    const media = normalizeMedia(state._media);
+    const editorLabels = locale === 'en'
+        ? { guest: 'Guest', type: 'Type', event: 'Event', timezone: 'Timezone', map: 'View location' }
+        : { guest: 'Invitado', type: 'Tipo', event: 'Evento', timezone: 'Zona horaria', map: 'Ver ubicacion' };
     const safeTitle = escapeHtml(state.headline);
 
     return `<!DOCTYPE html>
@@ -159,7 +330,7 @@ function generateHtmlDocument(state, template, locale, dictionary) {
         body {
             margin: 0;
             font-family: var(--font);
-            background: radial-gradient(circle at top, rgba(255,255,255,0.8), transparent 35%), var(--background);
+            background: ${media.background.url ? `linear-gradient(rgba(255,255,255,0.84), rgba(255,255,255,0.84)), url('${escapeHtml(media.background.url)}') center/cover fixed, var(--background)` : 'radial-gradient(circle at top, rgba(255,255,255,0.8), transparent 35%), var(--background)'};
             color: var(--text);
             min-height: 100vh;
             padding: 32px 18px;
@@ -205,6 +376,13 @@ function generateHtmlDocument(state, template, locale, dictionary) {
             line-height: 1.7;
             max-width: 640px;
             margin: 0;
+        }
+        .hero-photo {
+            margin-top: 24px;
+            width: min(520px, 100%);
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.55);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
         }
         .content {
             background: var(--surface);
@@ -253,6 +431,29 @@ function generateHtmlDocument(state, template, locale, dictionary) {
             text-decoration: none;
             font-weight: 700;
         }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+        }
+        .gallery figure {
+            margin: 0;
+            border-radius: 22px;
+            overflow: hidden;
+            background: rgba(248,250,252,0.9);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+        }
+        .gallery img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+        }
+        .gallery figcaption {
+            padding: 10px 12px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
         .footer {
             display: flex;
             flex-wrap: wrap;
@@ -273,9 +474,21 @@ function generateHtmlDocument(state, template, locale, dictionary) {
                 <span class="pill">${escapeHtml(state.eventLabel)}</span>
                 <h1>${safeTitle}</h1>
                 <p class="subtitle">${formatHtmlText(state.subheadline)}</p>
+                ${visibility.showHeroImage && media.hero.url ? `<img class="hero-photo" src="${escapeHtml(media.hero.url)}" alt="${escapeHtml(media.hero.alt)}">` : ''}
             </div>
         </section>
         <section class="content">
+            ${visibility.showGuestName && state.guestName ? `<div class="card">
+                <p class="label">${editorLabels.guest}</p>
+                <p class="value">${formatHtmlText(state.guestName)}</p>
+            </div>` : ''}
+            ${visibility.showEventDetails ? `<div class="meta">
+                ${state.eventType ? `<div class="card"><p class="label">${editorLabels.type}</p><p class="value">${formatHtmlText(state.eventType)}</p></div>` : ''}
+                ${state.eventName ? `<div class="card"><p class="label">${editorLabels.event}</p><p class="value">${formatHtmlText(state.eventName)}</p></div>` : ''}
+                ${state.dressCode ? `<div class="card"><p class="label">Dress code</p><p class="value">${formatHtmlText(state.dressCode)}</p></div>` : ''}
+                ${state.rsvpDeadline ? `<div class="card"><p class="label">RSVP</p><p class="value">${formatHtmlText(state.rsvpDeadline)}</p></div>` : ''}
+                ${state.timezoneLabel ? `<div class="card"><p class="label">${editorLabels.timezone}</p><p class="value">${formatHtmlText(state.timezoneLabel)}</p></div>` : ''}
+            </div>` : ''}
             <div class="card">
                 <p class="label">${escapeHtml(labels.hosts)}</p>
                 <p class="value">${formatHtmlText(state.hosts)}</p>
@@ -283,20 +496,27 @@ function generateHtmlDocument(state, template, locale, dictionary) {
             <div class="meta">
                 <div class="card">
                     <p class="label">${escapeHtml(labels.date)}</p>
-                    <p class="value">${formatHtmlText(state.dateLabel)}</p>
+                    <p class="value">${formatHtmlText(formatDateForDisplay(state.dateLabel, locale))}</p>
                 </div>
                 <div class="card">
                     <p class="label">${escapeHtml(labels.time)}</p>
-                    <p class="value">${formatHtmlText(state.timeLabel)}</p>
+                    <p class="value">${formatHtmlText(formatTimeForDisplay(state.timeLabel, locale))}</p>
                 </div>
                 <div class="card">
                     <p class="label">${escapeHtml(labels.venue)}</p>
                     <p class="value">${formatHtmlText(state.venueLabel)}</p>
                 </div>
             </div>
+            ${visibility.showLocation ? `<div class="card">
+                <p class="label">${escapeHtml(state.venueName || labels.venue)}</p>
+                <p class="value">${formatHtmlText(state.venueAddress || state.venueLabel)}</p>
+                ${state.googleMapsUrl ? `<a class="cta" href="${escapeHtml(state.googleMapsUrl)}">${escapeHtml(state.mapButtonLabel || editorLabels.map)}</a>` : ''}
+                ${state.appleMapsUrl ? `<a class="cta" href="${escapeHtml(state.appleMapsUrl)}" style="margin-left: 8px;">Apple Maps</a>` : ''}
+            </div>` : ''}
             <div class="card">
                 <p class="message">${formatHtmlText(state.message)}</p>
             </div>
+            ${visibility.showGallery && media.gallery.some((item) => item.url) ? `<div class="gallery">${renderGalleryImagesHtml(media)}</div>` : ''}
             <div class="footer">
                 <p class="message" style="max-width: 560px;">${formatHtmlText(state.closing)}</p>
                 <a class="cta" href="#">${escapeHtml(state.buttonLabel)}</a>
@@ -325,6 +545,7 @@ export default function PublicTemplateEditorPage({
     const dictionary = useMemo(() => normalizeDictionary(template.dictionary), [template.dictionary]);
     const contentFields = useMemo(() => (template.editorFields ?? []).filter((field) => field.group === 'content'), [template.editorFields]);
     const styleFields = useMemo(() => (template.editorFields ?? []).filter((field) => field.group === 'style'), [template.editorFields]);
+    const visibilityFields = useMemo(() => (template.editorFields ?? []).filter((field) => field.group === 'visibility'), [template.editorFields]);
     const initialState = useMemo(() => buildInitialState(template), [template]);
     const [editorState, setEditorState] = useState(initialState);
     const [downloadCount, setDownloadCount] = useState(template.downloadCount);
@@ -385,6 +606,82 @@ export default function PublicTemplateEditorPage({
             ...currentState,
             [key]: value,
         }));
+    }
+
+    function updateVisibility(key, value) {
+        setEditorState((currentState) => ({
+            ...currentState,
+            _visibility: {
+                ...normalizeVisibility(currentState._visibility),
+                [key]: value,
+            },
+        }));
+    }
+
+    function updateMedia(path, value) {
+        setEditorState((currentState) => {
+            const media = normalizeMedia(currentState._media);
+            const [group, key] = path.split('.');
+
+            return {
+                ...currentState,
+                _media: {
+                    ...media,
+                    [group]: {
+                        ...media[group],
+                        [key]: value,
+                    },
+                },
+            };
+        });
+    }
+
+    function updateGalleryItem(index, key, value) {
+        setEditorState((currentState) => {
+            const media = normalizeMedia(currentState._media);
+            const gallery = [...media.gallery];
+
+            gallery[index] = {
+                ...(gallery[index] ?? { url: '', alt: '', caption: '' }),
+                [key]: value,
+            };
+
+            return {
+                ...currentState,
+                _media: {
+                    ...media,
+                    gallery,
+                },
+            };
+        });
+    }
+
+    function addGalleryItem() {
+        setEditorState((currentState) => {
+            const media = normalizeMedia(currentState._media);
+
+            return {
+                ...currentState,
+                _media: {
+                    ...media,
+                    gallery: [...media.gallery, { url: '', alt: '', caption: '' }],
+                },
+            };
+        });
+    }
+
+    function removeGalleryItem(index) {
+        setEditorState((currentState) => {
+            const media = normalizeMedia(currentState._media);
+
+            return {
+                ...currentState,
+                _media: {
+                    ...media,
+                    gallery: media.gallery.filter((item, itemIndex) => itemIndex !== index),
+                },
+            };
+        });
     }
 
     async function persistInvitation(downloaded = false) {
@@ -540,6 +837,23 @@ export default function PublicTemplateEditorPage({
                                         const value = editorState[field.key] ?? '';
                                         const sharedClass = `w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${isLight ? 'border-slate-200 bg-slate-50 text-slate-900 focus:border-sky-400' : 'border-white/10 bg-slate-900/45 text-white focus:border-sky-400'}`;
 
+                                        if (field.type === 'timezone') {
+                                            return (
+                                                <label key={field.key} className="block">
+                                                    <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{label}</span>
+                                                    <select
+                                                        value={value || 'America/La_Paz'}
+                                                        onChange={(event) => updateField(field.key, event.target.value)}
+                                                        className={sharedClass}
+                                                    >
+                                                        {timezoneOptions.map((timezone) => (
+                                                            <option key={timezone} value={timezone}>{timezone}</option>
+                                                        ))}
+                                                    </select>
+                                                </label>
+                                            );
+                                        }
+
                                         return (
                                             <label key={field.key} className="block">
                                                 <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{label}</span>
@@ -552,6 +866,7 @@ export default function PublicTemplateEditorPage({
                                                     />
                                                 ) : (
                                                     <input
+                                                        type={['url', 'date', 'time'].includes(field.type) ? field.type : 'text'}
                                                         value={value}
                                                         onChange={(event) => updateField(field.key, event.target.value)}
                                                         className={sharedClass}
@@ -560,6 +875,76 @@ export default function PublicTemplateEditorPage({
                                             </label>
                                         );
                                     })}
+                                </div>
+                            </div>
+
+                            <div className={`rounded-[2rem] border p-5 ${isLight ? 'border-slate-200 bg-white/80' : 'border-white/10 bg-white/6'}`}>
+                                <h3 className={`text-lg font-semibold ${isLight ? 'text-slate-950' : 'text-white'}`}>{current.panels.visibility}</h3>
+                                <div className="mt-5 space-y-3">
+                                    {visibilityFields.map((field) => {
+                                        const label = current.fields[field.label_key] ?? field.key;
+                                        const checked = normalizeVisibility(editorState._visibility)[field.key];
+
+                                        return (
+                                            <label key={field.key} className={`flex cursor-pointer items-center justify-between gap-4 rounded-2xl border px-4 py-3 text-sm ${isLight ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-white/10 bg-slate-900/45 text-white/75'}`}>
+                                                <span>{label}</span>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={checked}
+                                                    onChange={(event) => updateVisibility(field.key, event.target.checked)}
+                                                    className="h-4 w-4 cursor-pointer rounded border-white/20 bg-transparent"
+                                                />
+                                            </label>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className={`rounded-[2rem] border p-5 ${isLight ? 'border-slate-200 bg-white/80' : 'border-white/10 bg-white/6'}`}>
+                                <div className="flex items-center justify-between gap-3">
+                                    <h3 className={`text-lg font-semibold ${isLight ? 'text-slate-950' : 'text-white'}`}>{current.panels.media}</h3>
+                                    <button
+                                        type="button"
+                                        onClick={addGalleryItem}
+                                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${isLight ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-white/8 text-white/75 hover:bg-white/12'} transition`}
+                                    >
+                                        {current.fields.add_gallery_image}
+                                    </button>
+                                </div>
+
+                                <div className="mt-5 space-y-4">
+                                    <label className="block">
+                                        <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{current.fields.hero_image_url}</span>
+                                        <input type="url" value={normalizeMedia(editorState._media).hero.url} onChange={(event) => updateMedia('hero.url', event.target.value)} className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${isLight ? 'border-slate-200 bg-slate-50 text-slate-900 focus:border-sky-400' : 'border-white/10 bg-slate-900/45 text-white focus:border-sky-400'}`} />
+                                    </label>
+                                    <label className="block">
+                                        <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{current.fields.hero_image_alt}</span>
+                                        <input value={normalizeMedia(editorState._media).hero.alt} onChange={(event) => updateMedia('hero.alt', event.target.value)} className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${isLight ? 'border-slate-200 bg-slate-50 text-slate-900 focus:border-sky-400' : 'border-white/10 bg-slate-900/45 text-white focus:border-sky-400'}`} />
+                                    </label>
+                                    <label className="block">
+                                        <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{current.fields.background_image_url}</span>
+                                        <input type="url" value={normalizeMedia(editorState._media).background.url} onChange={(event) => updateMedia('background.url', event.target.value)} className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${isLight ? 'border-slate-200 bg-slate-50 text-slate-900 focus:border-sky-400' : 'border-white/10 bg-slate-900/45 text-white focus:border-sky-400'}`} />
+                                    </label>
+                                    <label className="block">
+                                        <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{current.fields.background_image_alt}</span>
+                                        <input value={normalizeMedia(editorState._media).background.alt} onChange={(event) => updateMedia('background.alt', event.target.value)} className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${isLight ? 'border-slate-200 bg-slate-50 text-slate-900 focus:border-sky-400' : 'border-white/10 bg-slate-900/45 text-white focus:border-sky-400'}`} />
+                                    </label>
+
+                                    {normalizeMedia(editorState._media).gallery.map((item, index) => (
+                                        <div key={index} className={`rounded-2xl border p-3 ${isLight ? 'border-slate-200 bg-slate-50' : 'border-white/10 bg-slate-900/45'}`}>
+                                            <div className="flex items-center justify-between gap-3">
+                                                <span className={`text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>Gallery {index + 1}</span>
+                                                <button type="button" onClick={() => removeGalleryItem(index)} className="text-xs font-semibold text-rose-400">
+                                                    {current.fields.remove_gallery_image}
+                                                </button>
+                                            </div>
+                                            <div className="mt-3 space-y-3">
+                                                <input type="url" value={item.url} onChange={(event) => updateGalleryItem(index, 'url', event.target.value)} placeholder={current.fields.gallery_image_url} className={`w-full rounded-xl border px-3 py-2 text-sm outline-none ${isLight ? 'border-slate-200 bg-white text-slate-900' : 'border-white/10 bg-slate-950/45 text-white'}`} />
+                                                <input value={item.alt} onChange={(event) => updateGalleryItem(index, 'alt', event.target.value)} placeholder={current.fields.gallery_image_alt} className={`w-full rounded-xl border px-3 py-2 text-sm outline-none ${isLight ? 'border-slate-200 bg-white text-slate-900' : 'border-white/10 bg-slate-950/45 text-white'}`} />
+                                                <input value={item.caption} onChange={(event) => updateGalleryItem(index, 'caption', event.target.value)} placeholder={current.fields.gallery_image_caption} className={`w-full rounded-xl border px-3 py-2 text-sm outline-none ${isLight ? 'border-slate-200 bg-white text-slate-900' : 'border-white/10 bg-slate-950/45 text-white'}`} />
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 

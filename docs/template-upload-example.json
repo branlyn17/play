@@ -7,6 +7,13 @@
     "textColor": "#152033",
     "fontFamily": "Sora"
   },
+  "visibility": {
+    "showGuestName": true,
+    "showEventDetails": true,
+    "showLocation": true,
+    "showHeroImage": true,
+    "showGallery": true
+  },
   "locales": {
     "es": {
       "catalog": {
@@ -21,10 +28,21 @@
         "eventLabel": "Boda",
         "headline": "Una historia que empieza para siempre",
         "subheadline": "Celebra con nosotros una noche llena de amor, musica y momentos inolvidables.",
+        "guestName": "Familia Perez",
+        "eventType": "Boda",
+        "eventName": "Boda de Ana y Luis",
         "hosts": "Ana y Luis",
-        "dateLabel": "Sabado 18 de julio de 2026",
-        "timeLabel": "07:30 PM",
+        "dateLabel": "2026-07-18",
+        "timeLabel": "19:30",
         "venueLabel": "Jardin Aurora, Santa Cruz",
+        "dressCode": "Formal elegante",
+        "rsvpDeadline": "Confirmar hasta el 01 de julio de 2026",
+        "timezoneLabel": "America/La_Paz",
+        "venueName": "Jardin Aurora",
+        "venueAddress": "Av. Principal 123, Santa Cruz, Bolivia",
+        "googleMapsUrl": "https://maps.google.com/?q=Santa+Cruz+Bolivia",
+        "appleMapsUrl": "https://maps.apple.com/?q=Santa+Cruz+Bolivia",
+        "mapButtonLabel": "Ver ubicacion",
         "message": "Nos encantaria compartir este dia tan especial contigo. Tu presencia hara que nuestra celebracion sea aun mas memorable.",
         "closing": "Gracias por acompanarnos en este nuevo comienzo.",
         "buttonLabel": "Confirmar asistencia"
@@ -34,6 +52,23 @@
         "date": "Fecha",
         "time": "Hora",
         "venue": "Lugar"
+      },
+      "media": {
+        "hero": {
+          "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+          "alt": "Pareja celebrando una boda elegante"
+        },
+        "background": {
+          "url": "",
+          "alt": ""
+        },
+        "gallery": [
+          {
+            "url": "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=900&q=80",
+            "alt": "Decoracion de boda",
+            "caption": "Detalles preparados para celebrar"
+          }
+        ]
       }
     },
     "en": {
@@ -49,10 +84,21 @@
         "eventLabel": "Wedding",
         "headline": "A story that begins forever",
         "subheadline": "Celebrate with us an evening full of love, music and unforgettable moments.",
+        "guestName": "Perez Family",
+        "eventType": "Wedding",
+        "eventName": "Anna and Luis Wedding",
         "hosts": "Anna and Luis",
-        "dateLabel": "Saturday, July 18, 2026",
-        "timeLabel": "07:30 PM",
+        "dateLabel": "2026-07-18",
+        "timeLabel": "19:30",
         "venueLabel": "Aurora Garden, Santa Cruz",
+        "dressCode": "Formal elegant",
+        "rsvpDeadline": "Please RSVP by July 1, 2026",
+        "timezoneLabel": "America/La_Paz",
+        "venueName": "Aurora Garden",
+        "venueAddress": "Main Avenue 123, Santa Cruz, Bolivia",
+        "googleMapsUrl": "https://maps.google.com/?q=Santa+Cruz+Bolivia",
+        "appleMapsUrl": "https://maps.apple.com/?q=Santa+Cruz+Bolivia",
+        "mapButtonLabel": "View location",
         "message": "We would love to share this special day with you. Your presence will make our celebration even more memorable.",
         "closing": "Thank you for joining us in this new beginning.",
         "buttonLabel": "Confirm attendance"
@@ -62,6 +108,23 @@
         "date": "Date",
         "time": "Time",
         "venue": "Venue"
+      },
+      "media": {
+        "hero": {
+          "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+          "alt": "Couple celebrating an elegant wedding"
+        },
+        "background": {
+          "url": "",
+          "alt": ""
+        },
+        "gallery": [
+          {
+            "url": "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=900&q=80",
+            "alt": "Wedding decoration",
+            "caption": "Details prepared for the celebration"
+          }
+        ]
       }
     }
   }

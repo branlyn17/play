@@ -42,10 +42,21 @@ class TemplateSeeder extends Seeder
                                 'eventLabel' => 'Boda elegante',
                                 'headline' => 'Aura para una celebracion inolvidable',
                                 'subheadline' => 'Personaliza una invitacion delicada, romantica y lista para compartir.',
+                                'guestName' => 'Familia Perez',
+                                'eventType' => 'Boda',
+                                'eventName' => 'Boda de Valeria y Daniel',
                                 'hosts' => 'Valeria y Daniel',
-                                'dateLabel' => 'Sabado 18 de octubre de 2026',
-                                'timeLabel' => '07:30 PM',
+                                'dateLabel' => '2026-10-18',
+                                'timeLabel' => '19:30',
+                                'timezoneLabel' => 'America/La_Paz',
                                 'venueLabel' => 'Jardines del Lago, Cochabamba',
+                                'venueName' => 'Jardines del Lago',
+                                'venueAddress' => 'Av. Costanera del Lago 245, Cochabamba, Bolivia',
+                                'googleMapsUrl' => 'https://maps.google.com/?q=Jardines+del+Lago+Cochabamba+Bolivia',
+                                'appleMapsUrl' => 'https://maps.apple.com/?q=Jardines+del+Lago+Cochabamba+Bolivia',
+                                'mapButtonLabel' => 'Haz click aqui',
+                                'dressCode' => 'Elegante formal',
+                                'rsvpDeadline' => '2026-10-01',
                                 'message' => 'Acompananos en una noche especial llena de musica, detalles suaves y una experiencia pensada para emocionar.',
                                 'closing' => 'Confirma tu asistencia y guarda esta fecha para celebrar con nosotros.',
                                 'buttonLabel' => 'Confirmar asistencia',
@@ -64,10 +75,21 @@ class TemplateSeeder extends Seeder
                                 'eventLabel' => 'Elegant wedding',
                                 'headline' => 'Aura for an unforgettable celebration',
                                 'subheadline' => 'Customize a delicate, romantic invitation that is ready to share.',
+                                'guestName' => 'Perez Family',
+                                'eventType' => 'Wedding',
+                                'eventName' => 'Valeria and Daniel Wedding',
                                 'hosts' => 'Valeria and Daniel',
-                                'dateLabel' => 'Saturday, October 18, 2026',
-                                'timeLabel' => '07:30 PM',
+                                'dateLabel' => '2026-10-18',
+                                'timeLabel' => '19:30',
+                                'timezoneLabel' => 'America/La_Paz',
                                 'venueLabel' => 'Lake Gardens, Cochabamba',
+                                'venueName' => 'Lake Gardens',
+                                'venueAddress' => 'Lake Coast Avenue 245, Cochabamba, Bolivia',
+                                'googleMapsUrl' => 'https://maps.google.com/?q=Jardines+del+Lago+Cochabamba+Bolivia',
+                                'appleMapsUrl' => 'https://maps.apple.com/?q=Jardines+del+Lago+Cochabamba+Bolivia',
+                                'mapButtonLabel' => 'Click here',
+                                'dressCode' => 'Formal elegant',
+                                'rsvpDeadline' => '2026-10-01',
                                 'message' => 'Join us for a special evening shaped by music, soft details and a refined atmosphere.',
                                 'closing' => 'Confirm your attendance and save the date to celebrate with us.',
                                 'buttonLabel' => 'Confirm attendance',
@@ -456,6 +478,20 @@ class TemplateSeeder extends Seeder
         ];
 
         foreach ($templates as $data) {
+            $normalizedLocales = collect($data['defaults']['locales'])
+                ->map(function (array $payload) {
+                    $contentDefaults = collect(TemplateFieldCatalog::contentFields())
+                        ->pluck('key')
+                        ->mapWithKeys(fn (string $key) => [$key => ''])
+                        ->all();
+
+                    $payload['content'] = array_merge($contentDefaults, $payload['content'] ?? []);
+                    $payload['media'] = array_replace_recursive(TemplateFieldCatalog::defaultMedia(), $payload['media'] ?? []);
+
+                    return $payload;
+                })
+                ->all();
+
             $template = Template::updateOrCreate(
                 ['code' => $data['code']],
                 [
@@ -470,8 +506,9 @@ class TemplateSeeder extends Seeder
                     'default_content' => [
                         'shared' => [
                             'style' => $data['defaults']['style'],
+                            'visibility' => TemplateFieldCatalog::defaultVisibility(),
                         ],
-                        'locales' => $data['defaults']['locales'],
+                        'locales' => $normalizedLocales,
                     ],
                     'design_tokens' => $data['design_tokens'],
                     'available_fonts' => TemplateFieldCatalog::availableFonts(),

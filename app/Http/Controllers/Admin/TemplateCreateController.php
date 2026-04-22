@@ -30,6 +30,7 @@ class TemplateCreateController extends Controller
                 ->get(),
             'colorTokens' => TemplateFieldCatalog::availableColorTokens(),
             'requiredPlaceholders' => TemplateFieldCatalog::requiredPlaceholders(),
+            'optionalPlaceholders' => TemplateFieldCatalog::optionalPlaceholders(),
         ]);
     }
 
@@ -106,6 +107,7 @@ class TemplateCreateController extends Controller
                 'default_content' => [
                     'shared' => [
                         'style' => $payload['style'],
+                        'visibility' => $payload['visibility'],
                     ],
                     'locales' => collect($locales)->mapWithKeys(function (string $locale) use ($payload) {
                         return [
@@ -114,6 +116,7 @@ class TemplateCreateController extends Controller
                                 'dictionary' => [
                                     'labels' => $payload['locales'][$locale]['dictionary'],
                                 ],
+                                'media' => $payload['locales'][$locale]['media'],
                             ],
                         ];
                     })->all(),
@@ -165,6 +168,8 @@ class TemplateCreateController extends Controller
             ]);
         }
 
+        $payload = $this->emptyStringsToNull($payload);
+
         $unsupportedLocales = array_diff(array_keys($payload['locales'] ?? []), $locales);
 
         if ($unsupportedLocales !== []) {
@@ -182,8 +187,13 @@ class TemplateCreateController extends Controller
             'style.surfaceColor' => ['required', 'string', 'max:32'],
             'style.textColor' => ['required', 'string', 'max:32'],
             'style.fontFamily' => ['required', Rule::in(TemplateFieldCatalog::availableFonts())],
+            'visibility' => ['nullable', 'array'],
             'locales' => ['required', 'array'],
         ];
+
+        foreach (TemplateFieldCatalog::visibilityFields() as $field) {
+            $rules["visibility.{$field['key']}"] = ['nullable', 'boolean'];
+        }
 
         foreach ($locales as $locale) {
             $rules["locales.{$locale}"] = ['required', 'array'];
@@ -200,14 +210,76 @@ class TemplateCreateController extends Controller
             $rules["locales.{$locale}.catalog.seo_description"] = ['nullable', 'string', 'max:255'];
 
             foreach (TemplateFieldCatalog::contentFields() as $field) {
-                $rules["locales.{$locale}.content.{$field['key']}"] = ['required', 'string'];
+                $rule = ($field['required'] ?? false) ? ['required', 'string'] : ['nullable', 'string'];
+
+                if ($field['type'] === 'url') {
+                    $rule = ($field['required'] ?? false) ? ['required', 'url', 'max:2048'] : ['nullable', 'url', 'max:2048'];
+                } elseif ($field['type'] === 'date') {
+                    $rule = ($field['required'] ?? false) ? ['required', 'date_format:Y-m-d'] : ['nullable', 'date_format:Y-m-d'];
+                } elseif ($field['type'] === 'time') {
+                    $rule = ($field['required'] ?? false) ? ['required', 'date_format:H:i'] : ['nullable', 'date_format:H:i'];
+                } elseif ($field['type'] === 'timezone') {
+                    $rule = ($field['required'] ?? false) ? ['required', 'timezone'] : ['nullable', 'timezone'];
+                }
+
+                $rules["locales.{$locale}.content.{$field['key']}"] = $rule;
             }
 
             foreach (TemplateFieldCatalog::dictionaryFields() as $field) {
                 $rules["locales.{$locale}.dictionary.{$field['key']}"] = ['required', 'string', 'max:120'];
             }
+
+            $rules["locales.{$locale}.media"] = ['nullable', 'array'];
+            $rules["locales.{$locale}.media.hero.url"] = ['nullable', 'url', 'max:2048'];
+            $rules["locales.{$locale}.media.hero.alt"] = ['nullable', 'string', 'max:160'];
+            $rules["locales.{$locale}.media.background.url"] = ['nullable', 'url', 'max:2048'];
+            $rules["locales.{$locale}.media.background.alt"] = ['nullable', 'string', 'max:160'];
+            $rules["locales.{$locale}.media.gallery"] = ['nullable', 'array'];
+            $rules["locales.{$locale}.media.gallery.*.url"] = ['required_with:locales.'.$locale.'.media.gallery', 'url', 'max:2048'];
+            $rules["locales.{$locale}.media.gallery.*.alt"] = ['nullable', 'string', 'max:160'];
+            $rules["locales.{$locale}.media.gallery.*.caption"] = ['nullable', 'string', 'max:160'];
         }
 
-        return Validator::make($payload, $rules)->validate();
+        return $this->normalizePayload(Validator::make($payload, $rules)->validate(), $locales);
+    }
+
+    private function normalizePayload(array $payload, array $locales): array
+    {
+        $payload['visibility'] = array_merge(
+            TemplateFieldCatalog::defaultVisibility(),
+            $payload['visibility'] ?? [],
+        );
+
+        foreach ($locales as $locale) {
+            $payload['locales'][$locale]['content'] = array_merge(
+                collect(TemplateFieldCatalog::contentFields())->pluck('key')->mapWithKeys(fn (string $key) => [$key => ''])->all(),
+                collect($payload['locales'][$locale]['content'] ?? [])
+                    ->map(fn ($value) => $value ?? '')
+                    ->all(),
+            );
+
+            $payload['locales'][$locale]['media'] = array_replace_recursive(
+                TemplateFieldCatalog::defaultMedia(),
+                $payload['locales'][$locale]['media'] ?? [],
+            );
+        }
+
+        return $payload;
+    }
+
+    private function emptyStringsToNull(array $payload): array
+    {
+        foreach ($payload as $key => $value) {
+            if (is_array($value)) {
+                $payload[$key] = $this->emptyStringsToNull($value);
+                continue;
+            }
+
+            if ($value === '') {
+                $payload[$key] = null;
+            }
+        }
+
+        return $payload;
     }
 }

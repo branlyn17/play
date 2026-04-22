@@ -123,11 +123,19 @@
                         <div class="rounded-[1.3rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-soft)] p-4">
                             <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--admin-muted)]">{{ trans('admin.templates.create.sections.placeholders') }}</h3>
                             <p class="mt-2 text-sm leading-7 text-[color:var(--admin-text-soft)]">{{ trans('admin.templates.create.placeholders_help') }}</p>
+                            <p class="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--admin-muted)]">{{ trans('admin.templates.create.required_placeholders') }}</p>
                             <div class="mt-4 flex flex-wrap gap-2">
                                 @foreach ($requiredPlaceholders as $placeholder)
                                     <code class="rounded-full border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-3 py-1 text-xs text-[color:var(--admin-text)]">{{ $placeholder }}</code>
                                 @endforeach
                             </div>
+                            <p class="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--admin-muted)]">{{ trans('admin.templates.create.optional_placeholders') }}</p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                @foreach ($optionalPlaceholders as $placeholder)
+                                    <code class="rounded-full border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-3 py-1 text-xs text-[color:var(--admin-text-soft)]">{{ $placeholder }}</code>
+                                @endforeach
+                            </div>
+                            <p class="mt-5 text-sm leading-7 text-[color:var(--admin-text-soft)]">{{ trans('admin.templates.create.optional_sections_help') }}</p>
                         </div>
                     </div>
                 </div>

@@ -56,4 +56,9 @@ class Invitation extends Model
     {
         return $this->hasMany(InvitedGuest::class);
     }
+
+    public function mediaItems()
+    {
+        return $this->hasMany(InvitationMediaItem::class)->orderBy('sort_order');
+    }
 }

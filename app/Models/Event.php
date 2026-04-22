@@ -35,6 +35,13 @@ class Event extends Model
         'last_accessed_at',
     ];
 
+    protected $casts = [
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
+        'published_at' => 'datetime',
+        'last_accessed_at' => 'datetime',
+    ];
+
     public function owner()
     {
         return $this->belongsTo(User::class, 'owner_user_id');

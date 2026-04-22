@@ -5,10 +5,12 @@ namespace App\Support\Catalog;
 use App\Models\Event;
 use App\Models\Invitation;
 use App\Models\Template;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class InvitationDraftService
 {
@@ -21,12 +23,17 @@ class InvitationDraftService
         $title = $initialEditorState['headline'] ?? $translation?->name ?? $template->code;
         $description = $initialEditorState['subheadline'] ?? $translation?->teaser ?? $translation?->description;
         $parts = TemplateEditorBlueprint::splitEditorState($template, $initialEditorState);
+        $eventTiming = self::resolveEventTiming($initialEditorState);
 
-        return DB::transaction(function () use ($template, $locale, $title, $description, $initialEditorState, $parts, $blueprint) {
+        return DB::transaction(function () use ($template, $locale, $title, $description, $initialEditorState, $parts, $blueprint, $eventTiming) {
             $event = Event::create([
                 'title' => $title,
                 'description' => $description,
-                'timezone' => config('app.timezone', 'UTC'),
+                'starts_at' => $eventTiming['starts_at'],
+                'timezone' => $eventTiming['timezone'],
+                'venue_name' => ($initialEditorState['venueName'] ?? null) ?: ($initialEditorState['venueLabel'] ?? null),
+                'address_line' => $initialEditorState['venueAddress'] ?? null,
+                'location_url' => $initialEditorState['googleMapsUrl'] ?? null,
                 'privacy' => 'unlisted',
                 'status' => 'draft',
             ]);
@@ -51,6 +58,7 @@ class InvitationDraftService
             ]);
 
             $template->increment('use_count');
+            self::syncMediaItems($invitation, $parts['media']);
 
             return $invitation;
         });
@@ -91,8 +99,91 @@ class InvitationDraftService
         }
 
         $invitation->save();
+        $eventTiming = self::resolveEventTiming($editorState);
+
+        $invitation->event?->update([
+            'title' => ($editorState['eventName'] ?? null) ?: ($editorState['headline'] ?? $invitation->title),
+            'description' => $editorState['subheadline'] ?? $invitation->description,
+            'starts_at' => $eventTiming['starts_at'],
+            'timezone' => $eventTiming['timezone'],
+            'venue_name' => ($editorState['venueName'] ?? null) ?: ($editorState['venueLabel'] ?? null),
+            'address_line' => $editorState['venueAddress'] ?? null,
+            'location_url' => $editorState['googleMapsUrl'] ?? null,
+        ]);
+        self::syncMediaItems($invitation, $parts['media']);
 
         return $invitation->fresh(['template']);
+    }
+
+    protected static function resolveEventTiming(array $editorState): array
+    {
+        $timezone = self::validTimezone($editorState['timezoneLabel'] ?? null);
+        $date = $editorState['dateLabel'] ?? null;
+        $time = $editorState['timeLabel'] ?? null;
+        $startsAt = null;
+
+        if (is_string($date) && is_string($time) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && preg_match('/^\d{2}:\d{2}$/', $time)) {
+            try {
+                $startsAt = CarbonImmutable::createFromFormat('Y-m-d H:i', "{$date} {$time}", $timezone)->utc();
+            } catch (Throwable) {
+                $startsAt = null;
+            }
+        }
+
+        return [
+            'starts_at' => $startsAt,
+            'timezone' => $timezone,
+        ];
+    }
+
+    protected static function validTimezone(?string $timezone): string
+    {
+        if ($timezone && in_array($timezone, timezone_identifiers_list(), true)) {
+            return $timezone;
+        }
+
+        return config('app.timezone', 'UTC');
+    }
+
+    protected static function syncMediaItems(Invitation $invitation, array $media): void
+    {
+        $items = [];
+
+        foreach (['hero', 'background'] as $role) {
+            $item = $media[$role] ?? [];
+            $url = trim((string) ($item['url'] ?? ''));
+
+            if ($url === '') {
+                continue;
+            }
+
+            $items[] = [
+                'role' => $role,
+                'url' => $url,
+                'alt_text' => $item['alt'] ?? null,
+                'caption' => null,
+                'sort_order' => 0,
+            ];
+        }
+
+        foreach (($media['gallery'] ?? []) as $index => $item) {
+            $url = trim((string) ($item['url'] ?? ''));
+
+            if ($url === '') {
+                continue;
+            }
+
+            $items[] = [
+                'role' => 'gallery',
+                'url' => $url,
+                'alt_text' => $item['alt'] ?? null,
+                'caption' => $item['caption'] ?? null,
+                'sort_order' => $index + 1,
+            ];
+        }
+
+        $invitation->mediaItems()->delete();
+        $invitation->mediaItems()->createMany($items);
     }
 
     protected static function resolveTranslation(Collection $translations, string $locale, string $fallbackLocale): mixed
