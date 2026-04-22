@@ -18,6 +18,12 @@ return [
         'settings' => 'Configuracion',
         'logout' => 'Cerrar sesion',
     ],
+    'pwa' => [
+        'install' => 'Instalar Invita Plus Admin',
+        'install_short' => 'Instalar',
+        'ios_title' => 'Instalar en iPhone',
+        'ios_help' => 'Abre el menu Compartir de Safari y elige Agregar a pantalla de inicio para usar el panel como app.',
+    ],
     'sidebar' => [
         'panel' => 'Panel admin',
         'owner' => 'Owner workspace',

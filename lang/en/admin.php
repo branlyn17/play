@@ -18,6 +18,12 @@ return [
         'settings' => 'Settings',
         'logout' => 'Log out',
     ],
+    'pwa' => [
+        'install' => 'Install Invita Plus Admin',
+        'install_short' => 'Install',
+        'ios_title' => 'Install on iPhone',
+        'ios_help' => 'Open Safari share menu and choose Add to Home Screen to use the panel as an app.',
+    ],
     'sidebar' => [
         'panel' => 'Admin panel',
         'owner' => 'Owner workspace',

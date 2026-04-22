@@ -4,8 +4,14 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="theme-color" content="#4f7cff">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="InvitaAdmin">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
         <title>{{ $title ?? trans('admin.title') }}</title>
+        <link rel="manifest" href="/manifest-admin.json">
+        <link rel="apple-touch-icon" href="/admin-pwa/apple-touch-icon.png">
 
         <style>
             :root {
@@ -270,6 +276,10 @@
                                 <div class="hidden min-w-0 flex-1"></div>
 
                                 <div class="hidden shrink-0 items-center gap-2 lg:flex">
+                                    <button id="admin-install-toggle" type="button" class="hidden h-11 cursor-pointer items-center justify-center gap-2 rounded-[1.1rem] border border-[color:var(--admin-primary)]/40 bg-[color:var(--admin-primary-soft)] px-3 text-sm font-semibold text-[color:var(--admin-primary)] transition hover:bg-[color:var(--admin-surface-strong)]" aria-label="{{ trans('admin.pwa.install') }}">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>
+                                        <span>{{ trans('admin.pwa.install_short') }}</span>
+                                    </button>
                                     <button id="admin-fullscreen-toggle" type="button" class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]" aria-label="{{ trans('admin.fullscreen_toggle') }}">
                                         <span id="admin-fullscreen-icon" aria-hidden="true"></span>
                                     </button>
@@ -294,6 +304,9 @@
                                 </div>
 
                                 <div class="flex min-w-0 shrink-0 items-center justify-end gap-2 lg:hidden">
+                                    <button id="admin-install-toggle-mobile" type="button" class="hidden h-11 w-11 cursor-pointer items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-primary)]/40 bg-[color:var(--admin-primary-soft)] text-[color:var(--admin-primary)] transition hover:bg-[color:var(--admin-surface-strong)]" aria-label="{{ trans('admin.pwa.install') }}">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>
+                                    </button>
                                     <button id="admin-fullscreen-toggle-mobile" type="button" class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]" aria-label="{{ trans('admin.fullscreen_toggle') }}">
                                         <span id="admin-fullscreen-icon-mobile" aria-hidden="true"></span>
                                     </button>
@@ -307,6 +320,11 @@
                                     </button>
                                     <button id="admin-profile-toggle-mobile" type="button" class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-[color:var(--admin-primary)] text-sm font-bold text-white">{{ strtoupper(substr(auth()->user()->display_name, 0, 2)) }}</button>
                                 </div>
+                            </div>
+
+                            <div id="admin-pwa-ios-help" class="absolute right-4 top-[calc(100%+0.75rem)] z-30 hidden max-w-[300px] rounded-[1.5rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-shell)] p-4 text-sm leading-6 text-[color:var(--admin-text-soft)] shadow-[var(--admin-shadow)]">
+                                <p class="font-semibold text-[color:var(--admin-text)]">{{ trans('admin.pwa.ios_title') }}</p>
+                                <p class="mt-2">{{ trans('admin.pwa.ios_help') }}</p>
                             </div>
 
                             <div id="admin-locale-menu" class="absolute right-4 top-[calc(100%+0.75rem)] z-30 hidden min-w-56 rounded-[1.5rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-shell)] p-2 shadow-[var(--admin-shadow)]">
@@ -366,6 +384,9 @@
                 const fullscreenButtonMobile = document.getElementById('admin-fullscreen-toggle-mobile');
                 const fullscreenIcon = document.getElementById('admin-fullscreen-icon');
                 const fullscreenIconMobile = document.getElementById('admin-fullscreen-icon-mobile');
+                const installButton = document.getElementById('admin-install-toggle');
+                const installButtonMobile = document.getElementById('admin-install-toggle-mobile');
+                const iosInstallHelp = document.getElementById('admin-pwa-ios-help');
                 const localeMenu = document.getElementById('admin-locale-menu');
                 const localeToggleDesktop = document.getElementById('admin-locale-toggle-desktop');
                 const localeToggleMobile = document.getElementById('admin-locale-toggle');
@@ -378,7 +399,36 @@
                 const headerShell = document.querySelector('[data-admin-shell]');
                 const localeButtons = [localeToggleDesktop, localeToggleMobile].filter(Boolean);
                 const profileButtons = [profileToggleDesktop, profileToggleMobile].filter(Boolean);
+                const installButtons = [installButton, installButtonMobile].filter(Boolean);
                 let mobileSidebarOpen = false;
+                let deferredInstallPrompt = null;
+
+                function isStandaloneMode() {
+                    return window.matchMedia('(display-mode: standalone)').matches
+                        || window.matchMedia('(display-mode: fullscreen)').matches
+                        || window.navigator.standalone === true;
+                }
+
+                function isIosDevice() {
+                    return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+                }
+
+                function showInstallButtons() {
+                    if (isStandaloneMode()) return;
+
+                    installButtons.forEach(function (button) {
+                        button.classList.remove('hidden');
+                        button.classList.add(button === installButton ? 'inline-flex' : 'inline-flex');
+                    });
+                }
+
+                function hideInstallButtons() {
+                    installButtons.forEach(function (button) {
+                        button.classList.add('hidden');
+                        button.classList.remove('inline-flex');
+                    });
+                    iosInstallHelp?.classList.add('hidden');
+                }
 
                 function renderThemeIcon(theme) {
                     const icon = theme === 'light'
@@ -468,6 +518,7 @@
 
                     const willOpen = menu.classList.contains('hidden');
                     companionMenu?.classList.add('hidden');
+                    iosInstallHelp?.classList.add('hidden');
 
                     if (!willOpen) {
                         menu.classList.add('hidden');
@@ -482,6 +533,44 @@
                 setDesktopSidebarState(window.localStorage.getItem(sidebarStorageKey) !== 'closed');
                 applyFullscreenPreference(window.localStorage.getItem(fullscreenStorageKey) === 'on');
                 syncMobileSidebar();
+
+                if ('serviceWorker' in navigator && (window.isSecureContext || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+                    navigator.serviceWorker.register('/admin-sw.js', { scope: '/admin' }).catch(function () {});
+                }
+
+                window.addEventListener('beforeinstallprompt', function (event) {
+                    event.preventDefault();
+                    deferredInstallPrompt = event;
+                    showInstallButtons();
+                });
+
+                window.addEventListener('appinstalled', function () {
+                    deferredInstallPrompt = null;
+                    hideInstallButtons();
+                });
+
+                if (isIosDevice() && !isStandaloneMode()) {
+                    showInstallButtons();
+                }
+
+                installButtons.forEach(function (button) {
+                    button?.addEventListener('click', async function () {
+                        if (deferredInstallPrompt) {
+                            deferredInstallPrompt.prompt();
+                            await deferredInstallPrompt.userChoice;
+                            deferredInstallPrompt = null;
+                            hideInstallButtons();
+                            return;
+                        }
+
+                        if (isIosDevice()) {
+                            localeMenu?.classList.add('hidden');
+                            profileMenu?.classList.add('hidden');
+                            positionFloatingMenu(iosInstallHelp, button);
+                            iosInstallHelp?.classList.toggle('hidden');
+                        }
+                    });
+                });
 
                 [themeButton, themeButtonMobile].forEach(function (button) {
                     button?.addEventListener('click', function () {
@@ -554,6 +643,10 @@
                     if (profileMenu && !profileMenu.contains(event.target) && !clickedProfileControl) {
                         profileMenu.classList.add('hidden');
                     }
+
+                    if (iosInstallHelp && !iosInstallHelp.contains(event.target) && !installButtons.some((button) => button.contains(event.target))) {
+                        iosInstallHelp.classList.add('hidden');
+                    }
                 });
 
                 document.querySelectorAll('[data-admin-accordion-trigger]').forEach(function (trigger) {
@@ -589,12 +682,14 @@
                     }
                     localeMenu?.classList.add('hidden');
                     profileMenu?.classList.add('hidden');
+                    iosInstallHelp?.classList.add('hidden');
                     syncMobileSidebar();
                 });
 
                 window.addEventListener('resize', function () {
                     localeMenu?.classList.add('hidden');
                     profileMenu?.classList.add('hidden');
+                    iosInstallHelp?.classList.add('hidden');
                 });
             }());
         </script>
