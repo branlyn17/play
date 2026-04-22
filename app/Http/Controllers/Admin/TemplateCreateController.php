@@ -7,6 +7,7 @@ use App\Models\InvitationCategory;
 use App\Models\Template;
 use App\Models\TemplateTranslation;
 use App\Support\Templates\TemplateFieldCatalog;
+use App\Support\Templates\TemplatePreviewGenerator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,10 @@ use Illuminate\Validation\ValidationException;
 
 class TemplateCreateController extends Controller
 {
+    public function __construct(
+        private readonly TemplatePreviewGenerator $previewGenerator,
+    ) {}
+
     public function create(): View
     {
         return view('admin.templates.create', [
@@ -152,6 +157,8 @@ class TemplateCreateController extends Controller
 
             return $template;
         });
+
+        $this->previewGenerator->generate($template, $template->default_locale, true);
 
         return redirect()
             ->route('admin.templates.index', request()->has('lang') ? ['lang' => request()->query('lang')] : [])

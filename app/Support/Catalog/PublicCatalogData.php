@@ -72,6 +72,8 @@ class PublicCatalogData
                         'downloadCount' => (int) $template->download_count,
                         'useCount' => (int) $template->use_count,
                         'previewImagePath' => $template->preview_image_path,
+                        'previewImageUrl' => self::assetUrl($template->preview_image_path),
+                        'thumbnailImageUrl' => self::assetUrl($template->thumbnail_image_path),
                         'background' => $designTokens['catalog_background'] ?? self::fallbackBackground($template->code),
                         'accent' => $designTokens['accent'] ?? 'sky',
                         'badge' => $preview['badge'] ?? ($template->is_featured ? __('public.catalog.featured_badge') : __('public.catalog.ready_badge')),
@@ -111,5 +113,18 @@ class PublicCatalogData
             'sky' => 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03)), radial-gradient(circle at top, rgba(186,230,253,0.5), transparent 30%), radial-gradient(circle at bottom right, rgba(125,211,252,0.22), transparent 24%), linear-gradient(135deg, #f0f9ff, #dbeafe, #e0e7ff)',
             default => 'linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)), radial-gradient(circle at top left, rgba(224,242,254,0.8), transparent 34%), radial-gradient(circle at bottom right, rgba(147,197,253,0.26), transparent 26%), linear-gradient(135deg, #ffffff, #eff6ff, #dbeafe)',
         };
+    }
+
+    protected static function assetUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://') || str_starts_with($path, '//')) {
+            return $path;
+        }
+
+        return asset(ltrim($path, '/'));
     }
 }

@@ -492,13 +492,15 @@ class TemplateSeeder extends Seeder
                 })
                 ->all();
 
+            $existingTemplate = Template::query()->where('code', $data['code'])->first();
+
             $template = Template::updateOrCreate(
                 ['code' => $data['code']],
                 [
                     'invitation_category_id' => $categories[$data['category_key']] ?? null,
                     'default_locale' => 'es',
-                    'preview_image_path' => null,
-                    'thumbnail_image_path' => null,
+                    'preview_image_path' => $existingTemplate?->preview_image_path,
+                    'thumbnail_image_path' => $existingTemplate?->thumbnail_image_path,
                     'source_html_path' => "templates/{$data['code']}/index.html",
                     'source_css_path' => "templates/{$data['code']}/style.css",
                     'source_js_path' => null,

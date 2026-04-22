@@ -204,7 +204,7 @@ export default function PublicCatalogPage({
                             <a
                                 key={template.id}
                                 href={template.href}
-                                className={`overflow-hidden rounded-[1.8rem] border transition hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(15,23,42,0.18)] ${
+                                className={`group overflow-hidden rounded-[1.8rem] border transition hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(15,23,42,0.18)] ${
                                     isLight ? 'border-slate-200 bg-white/80' : 'border-white/10 bg-white/6'
                                 }`}
                             >
@@ -213,54 +213,94 @@ export default function PublicCatalogPage({
                                         className="relative h-full overflow-hidden rounded-[1.35rem] border border-white/20"
                                         style={{ background: template.background }}
                                     >
+                                        {template.previewImageUrl ? (
+                                            <img
+                                                src={template.thumbnailImageUrl ?? template.previewImageUrl}
+                                                alt={template.name}
+                                                loading="lazy"
+                                                className="absolute inset-0 h-full w-full object-cover object-top transition duration-700 group-hover:scale-[1.035]"
+                                            />
+                                        ) : null}
+
                                         <div
                                             className={`absolute inset-0 ${
-                                                isLight
-                                                    ? 'bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.14))]'
-                                                    : 'bg-[linear-gradient(180deg,rgba(15,23,42,0.05),rgba(15,23,42,0.18))]'
+                                                template.previewImageUrl
+                                                    ? isLight
+                                                        ? 'bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(15,23,42,0.1))]'
+                                                        : 'bg-[linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.22))]'
+                                                    : isLight
+                                                      ? 'bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.14))]'
+                                                      : 'bg-[linear-gradient(180deg,rgba(15,23,42,0.05),rgba(15,23,42,0.18))]'
                                             }`}
                                         />
 
-                                        <div className="relative flex h-full flex-col justify-between p-5">
-                                            <div className="flex items-center justify-between gap-3">
-                                                <div
-                                                    className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${
-                                                        isLight ? 'bg-white/80 text-slate-700' : 'bg-white/12 text-white/80'
-                                                    }`}
-                                                >
-                                                    {template.categoryName}
-                                                </div>
-                                                <div
-                                                    className={`rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.22em] ${
-                                                        template.isPremium
-                                                            ? isLight
-                                                                ? 'bg-indigo-600 text-white'
-                                                                : 'bg-indigo-500 text-white'
-                                                            : isLight
-                                                              ? 'bg-slate-900/8 text-slate-600'
-                                                              : 'bg-black/15 text-white/60'
-                                                    }`}
-                                                >
-                                                    {template.isPremium ? current.premiumLabel : current.baseLabel}
+                                        {template.previewImageUrl ? (
+                                            <div className="relative flex h-full flex-col justify-start p-5">
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <div
+                                                        className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${
+                                                            isLight ? 'bg-white/80 text-slate-700' : 'bg-white/12 text-white/80'
+                                                        }`}
+                                                    >
+                                                        {template.categoryName}
+                                                    </div>
+                                                    <div
+                                                        className={`rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.22em] ${
+                                                            template.isPremium
+                                                                ? isLight
+                                                                    ? 'bg-indigo-600 text-white'
+                                                                    : 'bg-indigo-500 text-white'
+                                                                : isLight
+                                                                  ? 'bg-slate-900/8 text-slate-600'
+                                                                  : 'bg-black/15 text-white/60'
+                                                        }`}
+                                                    >
+                                                        {template.isPremium ? current.premiumLabel : current.baseLabel}
+                                                    </div>
                                                 </div>
                                             </div>
+                                        ) : (
+                                            <div className="relative flex h-full flex-col justify-between p-5">
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <div
+                                                        className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${
+                                                            isLight ? 'bg-white/80 text-slate-700' : 'bg-white/12 text-white/80'
+                                                        }`}
+                                                    >
+                                                        {template.categoryName}
+                                                    </div>
+                                                    <div
+                                                        className={`rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.22em] ${
+                                                            template.isPremium
+                                                                ? isLight
+                                                                    ? 'bg-indigo-600 text-white'
+                                                                    : 'bg-indigo-500 text-white'
+                                                                : isLight
+                                                                  ? 'bg-slate-900/8 text-slate-600'
+                                                                  : 'bg-black/15 text-white/60'
+                                                        }`}
+                                                    >
+                                                        {template.isPremium ? current.premiumLabel : current.baseLabel}
+                                                    </div>
+                                                </div>
 
-                                            <div>
-                                                <p className={`text-sm uppercase tracking-[0.28em] ${isLight ? 'text-slate-600' : 'text-white/65'}`}>
-                                                    {appName}
-                                                </p>
-                                                <h2 className={`mt-3 text-4xl font-semibold tracking-tight ${isLight ? 'text-slate-950' : 'text-white'}`}>
-                                                    {template.name}
-                                                </h2>
-                                                <div
-                                                    className={`mt-4 inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
-                                                        isLight ? 'bg-white/75 text-slate-700' : 'bg-white/10 text-white/78'
-                                                    }`}
-                                                >
-                                                    {template.badge}
+                                                <div>
+                                                    <p className={`text-sm uppercase tracking-[0.28em] ${isLight ? 'text-slate-600' : 'text-white/65'}`}>
+                                                        {appName}
+                                                    </p>
+                                                    <h2 className={`mt-3 text-4xl font-semibold tracking-tight ${isLight ? 'text-slate-950' : 'text-white'}`}>
+                                                        {template.name}
+                                                    </h2>
+                                                    <div
+                                                        className={`mt-4 inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
+                                                            isLight ? 'bg-white/75 text-slate-700' : 'bg-white/10 text-white/78'
+                                                        }`}
+                                                    >
+                                                        {template.badge}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
 
