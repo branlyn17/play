@@ -1,6 +1,6 @@
-export default function HeroSection({ appName, copy, slides, activeIndex, onSlideChange, theme }) {
+export default function HeroSection({ appName, copy, slides, activeIndex, onSlideChange, theme, catalogHref = '#' }) {
     const isLight = theme === 'light';
-    const activeSlide = slides[activeIndex];
+    const activeSlide = slides[activeIndex] ?? slides[0] ?? {};
 
     return (
         <section className="px-2 pt-4 sm:px-4">
@@ -31,7 +31,7 @@ export default function HeroSection({ appName, copy, slides, activeIndex, onSlid
 
                 <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                     <a
-                        href="#"
+                        href={catalogHref}
                         className={`rounded-2xl px-8 py-4 text-lg font-semibold transition ${
                             isLight
                                 ? 'bg-indigo-600 text-white shadow-[0_22px_40px_rgba(79,70,229,0.25)] hover:bg-indigo-500'
@@ -41,7 +41,7 @@ export default function HeroSection({ appName, copy, slides, activeIndex, onSlid
                         {copy.primaryAction}
                     </a>
                     <a
-                        href="#"
+                        href={activeSlide.href ?? catalogHref}
                         className={`rounded-2xl border px-8 py-4 text-lg font-semibold transition ${
                             isLight
                                 ? 'border-slate-200 bg-white/80 text-slate-800 hover:bg-white'
@@ -90,6 +90,14 @@ export default function HeroSection({ appName, copy, slides, activeIndex, onSlid
                                         background: slide.background,
                                     }}
                                 />
+                                {slide.imageUrl ? (
+                                    <img
+                                        src={slide.imageUrl}
+                                        alt={slide.title}
+                                        className="absolute inset-0 h-full w-full object-cover object-top"
+                                        loading={index === 0 ? 'eager' : 'lazy'}
+                                    />
+                                ) : null}
                                 <div className={`absolute inset-0 ${isLight ? 'bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.1))]' : 'bg-[linear-gradient(180deg,rgba(15,23,42,0.05),rgba(15,23,42,0.18))]'}`} />
 
                                 <div className="relative flex h-full flex-col justify-between p-6 sm:p-8">
@@ -102,19 +110,25 @@ export default function HeroSection({ appName, copy, slides, activeIndex, onSlid
                                         </div>
                                     </div>
 
-                                    <div className="max-w-md">
-                                        <p className={`text-sm uppercase tracking-[0.3em] ${isLight ? 'text-slate-600' : 'text-white/65'}`}>{appName}</p>
-                                        <h2 className={`mt-4 text-4xl font-semibold tracking-tight sm:text-5xl ${isLight ? 'text-slate-950' : 'text-white'}`}>{slide.title}</h2>
-                                        <p className={`mt-4 text-base leading-7 ${isLight ? 'text-slate-700' : 'text-white/78'}`}>{slide.caption}</p>
-                                    </div>
+                                    <div className="flex-1" />
 
                                     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                                         <div className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${isLight ? 'bg-white/80 text-slate-700' : 'bg-white/10 text-white/75'}`}>
                                             {slide.label}
                                         </div>
-                                        <div className={`float-slow rounded-[1.25rem] border px-4 py-3 backdrop-blur-xl ${isLight ? 'border-white/50 bg-white/75 text-slate-800' : 'border-white/14 bg-white/10 text-white'}`}>
-                                            <p className={`text-[11px] uppercase tracking-[0.24em] ${isLight ? 'text-slate-500' : 'text-white/55'}`}>{copy.previewLabel}</p>
-                                            <p className="mt-1 text-sm font-semibold">{slide.preview}</p>
+                                        <div
+                                            className={`float-slow max-w-sm rounded-[1.45rem] border px-5 py-4 text-left backdrop-blur-2xl ${
+                                                isLight
+                                                    ? 'border-white/70 bg-white/82 text-slate-900 shadow-[0_24px_60px_rgba(15,23,42,0.14)]'
+                                                    : 'border-white/16 bg-slate-950/58 text-white shadow-[0_24px_70px_rgba(2,6,23,0.34)]'
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between gap-4">
+                                                <p className={`text-[11px] font-semibold uppercase tracking-[0.26em] ${isLight ? 'text-slate-500' : 'text-white/55'}`}>{copy.previewLabel}</p>
+                                                <span className={`h-1.5 w-10 rounded-full ${isLight ? 'bg-indigo-500' : 'bg-white/70'}`} />
+                                            </div>
+                                            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">{slide.title}</h2>
+                                            <p className={`mt-2 text-sm leading-6 ${isLight ? 'text-slate-600' : 'text-white/72'}`}>{slide.caption}</p>
                                         </div>
                                     </div>
                                 </div>

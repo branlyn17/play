@@ -27,10 +27,10 @@ return [
             'title_top' => 'Invitaciones que',
             'title_accent' => 'todos amaran.',
             'subtitle' => 'Disena, envia y gestiona invitaciones digitales para cualquier evento. Plantillas profesionales, RSVP y acceso global.',
-            'primary_action' => 'Ver Plantillas',
-            'secondary_action' => 'Ver Demo',
+            'primary_action' => 'Ver Catálogo',
+            'secondary_action' => 'Ver más allá',
             'bullets' => [
-                'Sin tarjeta de credito',
+                'Elige tu estilo',
                 'Descarga instantanea',
             ],
             'slider_label' => 'Vista previa',

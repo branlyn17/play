@@ -34,10 +34,13 @@ export default function PublicLandingPage({
     navigation = [],
     shared = {},
     content = {},
+    featuredSlides = [],
+    catalogHref = '#',
 }) {
     const [theme, setTheme] = useState('dark');
     const [activeIndex, setActiveIndex] = useState(0);
     const current = useMemo(() => normalizeHomeContent(content), [content]);
+    const slides = featuredSlides.length > 0 ? featuredSlides : current.slides;
 
     useEffect(() => {
         const savedTheme = window.localStorage.getItem('invita-plus-theme');
@@ -54,19 +57,19 @@ export default function PublicLandingPage({
 
     useEffect(() => {
         setActiveIndex(0);
-    }, [locale]);
+    }, [locale, featuredSlides.length]);
 
     useEffect(() => {
-        if (current.slides.length <= 1) {
+        if (slides.length <= 1) {
             return undefined;
         }
 
         const interval = window.setInterval(() => {
-            setActiveIndex((currentIndex) => (currentIndex + 1) % current.slides.length);
+            setActiveIndex((currentIndex) => (currentIndex + 1) % slides.length);
         }, 4200);
 
         return () => window.clearInterval(interval);
-    }, [current.slides.length]);
+    }, [slides.length]);
 
     return (
         <PublicLayout
@@ -96,10 +99,11 @@ export default function PublicLandingPage({
             <HeroSection
                 appName={appName}
                 copy={current.hero}
-                slides={current.slides}
+                slides={slides}
                 activeIndex={activeIndex}
                 onSlideChange={setActiveIndex}
                 theme={theme}
+                catalogHref={catalogHref}
             />
             <FeatureGrid items={current.cards} theme={theme} />
         </PublicLayout>

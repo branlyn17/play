@@ -27,10 +27,10 @@ return [
             'title_top' => 'Invitations that',
             'title_accent' => 'everyone will love.',
             'subtitle' => 'Design, send and manage digital invitations for any event. Professional templates, RSVP and global access.',
-            'primary_action' => 'View Templates',
-            'secondary_action' => 'Watch Demo',
+            'primary_action' => 'View Catalog',
+            'secondary_action' => 'See beyond',
             'bullets' => [
-                'No credit card',
+                'Choose your style',
                 'Instant access',
             ],
             'slider_label' => 'Preview',
