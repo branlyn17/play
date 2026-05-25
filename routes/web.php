@@ -10,42 +10,64 @@ use App\Http\Controllers\PublicCatalogController;
 use App\Http\Controllers\PublicHomeController;
 use App\Http\Controllers\PublicTemplateInvitationController;
 use App\Http\Controllers\PublicTemplateEditorController;
+use App\Support\Localization\LocaleConfig;
 use App\Support\Localization\PublicPage;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/'.PublicPage::defaultLocale());
 
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+Route::get('/login', function (Request $request): RedirectResponse {
+    return redirect()->route('login', [
+        'locale' => LocaleConfig::default(),
+        'redirect' => $request->query('redirect'),
+    ]);
 });
 
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-    Route::middleware(['set.admin.locale', 'role:superadmin'])
-        ->prefix('/admin')
-        ->name('admin.')
-        ->group(function () {
-            Route::get('/', DashboardController::class)->name('dashboard');
+Route::get('/admin', function (): RedirectResponse {
+    return redirect()->route('admin.dashboard', [
+        'locale' => LocaleConfig::default(),
+    ]);
+});
 
-            Route::get('/templates', TemplateIndexController::class)->name('templates.index');
-            Route::get('/templates/create', [TemplateCreateController::class, 'create'])->name('templates.create');
-            Route::post('/templates', [TemplateCreateController::class, 'store'])->name('templates.store');
-            Route::get('/templates/{template}/edit', [TemplateCreateController::class, 'edit'])->name('templates.edit');
-            Route::put('/templates/{template}', [TemplateCreateController::class, 'update'])->name('templates.update');
-            Route::get('/templates/{template}/download/html', [TemplateCreateController::class, 'downloadHtml'])->name('templates.download-html');
-            Route::get('/templates/{template}/download/json', [TemplateCreateController::class, 'downloadJson'])->name('templates.download-json');
-
-            Route::get('/template-categories', [TemplateCategoryController::class, 'index'])->name('template-categories.index');
-            Route::get('/template-categories/create', [TemplateCategoryController::class, 'create'])->name('template-categories.create');
-            Route::post('/template-categories', [TemplateCategoryController::class, 'store'])->name('template-categories.store');
-            Route::get('/template-categories/{templateCategory}/edit', [TemplateCategoryController::class, 'edit'])->name('template-categories.edit');
-            Route::put('/template-categories/{templateCategory}', [TemplateCategoryController::class, 'update'])->name('template-categories.update');
-            Route::delete('/template-categories/{templateCategory}', [TemplateCategoryController::class, 'destroy'])->name('template-categories.destroy');
-
-            Route::get('/template-analytics', TemplateAnalyticsController::class)->name('template-analytics.index');
+Route::prefix('{locale}')
+    ->where(['locale' => PublicPage::localePattern()])
+    ->middleware('set.locale')
+    ->group(function () {
+        Route::middleware('guest')->group(function () {
+            Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+            Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
         });
-});
+
+        Route::middleware('auth')->group(function () {
+            Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+            Route::middleware('role:superadmin')
+                ->prefix('/admin')
+                ->name('admin.')
+                ->group(function () {
+                    Route::get('/', DashboardController::class)->name('dashboard');
+
+                    Route::get('/templates', TemplateIndexController::class)->name('templates.index');
+                    Route::get('/templates/create', [TemplateCreateController::class, 'create'])->name('templates.create');
+                    Route::post('/templates', [TemplateCreateController::class, 'store'])->name('templates.store');
+                    Route::get('/templates/{template}/edit', [TemplateCreateController::class, 'edit'])->name('templates.edit');
+                    Route::put('/templates/{template}', [TemplateCreateController::class, 'update'])->name('templates.update');
+                    Route::get('/templates/{template}/download/html', [TemplateCreateController::class, 'downloadHtml'])->name('templates.download-html');
+                    Route::get('/templates/{template}/download/json', [TemplateCreateController::class, 'downloadJson'])->name('templates.download-json');
+
+                    Route::get('/template-categories', [TemplateCategoryController::class, 'index'])->name('template-categories.index');
+                    Route::get('/template-categories/create', [TemplateCategoryController::class, 'create'])->name('template-categories.create');
+                    Route::post('/template-categories', [TemplateCategoryController::class, 'store'])->name('template-categories.store');
+                    Route::get('/template-categories/{templateCategory}/edit', [TemplateCategoryController::class, 'edit'])->name('template-categories.edit');
+                    Route::put('/template-categories/{templateCategory}', [TemplateCategoryController::class, 'update'])->name('template-categories.update');
+                    Route::delete('/template-categories/{templateCategory}', [TemplateCategoryController::class, 'destroy'])->name('template-categories.destroy');
+
+                    Route::get('/template-analytics', TemplateAnalyticsController::class)->name('template-analytics.index');
+                });
+        });
+    });
 
 foreach (PublicPage::supportedLocales() as $locale) {
     Route::prefix($locale)

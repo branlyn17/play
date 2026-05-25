@@ -8,14 +8,21 @@ class PublicViewData
 {
     public static function make(string $page, array $extraProps = []): array
     {
-        $locale = app()->getLocale();
+        $locale = LocaleConfig::current();
         $content = trans("public.{$page}");
         $baseProps = [
             'appName' => config('app.name'),
             'locale' => $locale,
+            'localeMeta' => LocaleConfig::metadata($locale),
             'shared' => trans('public.shared'),
             'content' => is_array($content) ? $content : [],
             'auth' => UserDestination::authPayload(),
+            'i18n' => [
+                'locale' => $locale,
+                'fallbackLocale' => LocaleConfig::fallbackFor($locale),
+                'direction' => LocaleConfig::direction($locale),
+                'messages' => TranslationCatalog::subset(self::translationPrefixes($page), $locale),
+            ],
         ];
 
         if (! array_key_exists('locales', $extraProps)) {
@@ -42,5 +49,17 @@ class PublicViewData
             'template_editor' => 'public-template_editor',
             default => "public-{$page}",
         };
+    }
+
+    protected static function translationPrefixes(string $page): array
+    {
+        return [
+            'actions.',
+            'auth.',
+            'common.',
+            'errors.',
+            'public.shared.',
+            "public.{$page}.",
+        ];
     }
 }

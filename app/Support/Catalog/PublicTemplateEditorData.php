@@ -109,7 +109,7 @@ class PublicTemplateEditorData
     {
         $options = [];
 
-        foreach (config('locales.supported', []) as $code => $meta) {
+        foreach (\App\Support\Localization\LocaleConfig::supported() as $code => $meta) {
             $translation = $template->translations->firstWhere('locale', $code);
             $query = [];
 
@@ -121,7 +121,9 @@ class PublicTemplateEditorData
                 'code' => $code,
                 'label' => $meta['label'],
                 'name' => $meta['name'],
+                'nativeName' => $meta['native_name'],
                 'flag' => $meta['flag'],
+                'direction' => $meta['direction'],
                 'href' => $translation
                     ? route(PublicPage::routeName('catalog.show', $code), array_merge(['slug' => $translation->slug], $query))
                     : route(PublicPage::routeName('catalog', $code)),

@@ -248,6 +248,6 @@ class TemplateCategoryController extends Controller
 
     private function routeQuery(): array
     {
-        return request()->has('lang') ? ['lang' => request()->query('lang')] : [];
+        return [];
     }
 }

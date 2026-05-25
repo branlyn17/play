@@ -138,7 +138,7 @@ class TemplateCreateController extends Controller
         $this->previewGenerator->generate($template, $template->default_locale, true);
 
         return redirect()
-            ->route('admin.templates.index', request()->has('lang') ? ['lang' => request()->query('lang')] : [])
+            ->route('admin.templates.index')
             ->with('status', trans('admin.templates.create.flash.created', ['name' => $template->code]));
     }
 
@@ -263,7 +263,7 @@ class TemplateCreateController extends Controller
         $this->previewGenerator->generate($template->fresh(['translations', 'category.translations']), $template->default_locale, true);
 
         return redirect()
-            ->route('admin.templates.index', request()->has('lang') ? ['lang' => request()->query('lang')] : [])
+            ->route('admin.templates.index')
             ->with('status', trans('admin.templates.edit.flash.updated', ['name' => $template->code]));
     }
 

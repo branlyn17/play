@@ -14,7 +14,7 @@
                 </div>
 
                 <a
-                    href="{{ route('admin.template-categories.index', request()->has('lang') ? ['lang' => request()->query('lang')] : []) }}"
+                    href="{{ route('admin.template-categories.index') }}"
                     class="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-5 text-sm font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]"
                 >
                     {{ trans('admin.template_categories.create.back') }}
@@ -23,7 +23,7 @@
         </section>
 
         @include('admin.template-categories._form', [
-            'action' => route('admin.template-categories.store', request()->has('lang') ? ['lang' => request()->query('lang')] : []),
+            'action' => route('admin.template-categories.store'),
             'submitLabel' => trans('admin.template_categories.create.submit'),
         ])
     </div>

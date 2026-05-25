@@ -14,7 +14,7 @@
                 </div>
 
                 <a
-                    href="{{ route('admin.templates.index', request()->has('lang') ? ['lang' => request()->query('lang')] : []) }}"
+                    href="{{ route('admin.templates.index') }}"
                     class="inline-flex h-11 cursor-pointer items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-4 text-sm font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]"
                 >
                     {{ trans('admin.templates.create.back') }}
@@ -33,7 +33,7 @@
             </section>
         @endif
 
-        <form method="POST" action="{{ route('admin.templates.store', request()->has('lang') ? ['lang' => request()->query('lang')] : []) }}" enctype="multipart/form-data" class="space-y-5">
+        <form method="POST" action="{{ route('admin.templates.store') }}" enctype="multipart/form-data" class="space-y-5">
             @csrf
 
             <section class="rounded-[2rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-6 shadow-[var(--admin-shadow)]">

@@ -2,7 +2,6 @@
 
 @section('content')
     @php
-        $langQuery = request()->has('lang') ? ['lang' => request()->query('lang')] : [];
         $eventOptions = [
             'all' => trans('admin.template_analytics.filters.all_events'),
             'view' => trans('admin.template_analytics.events.view'),
@@ -46,10 +45,6 @@
 
         <section class="rounded-[2rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-5 shadow-[var(--admin-shadow)]">
             <form method="GET" action="{{ route('admin.template-analytics.index') }}" class="grid gap-3 xl:grid-cols-[1.4fr_0.8fr_0.8fr_0.7fr_0.8fr_0.8fr_auto] xl:items-end">
-                @if (request()->has('lang'))
-                    <input type="hidden" name="lang" value="{{ request()->query('lang') }}">
-                @endif
-
                 <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--admin-muted)]">{{ trans('admin.template_analytics.filters.search') }}</span>
                     <input name="search" value="{{ $filters['search'] }}" placeholder="{{ trans('admin.template_analytics.filters.search_placeholder') }}" class="h-11 w-full rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-soft)] px-4 text-sm text-[color:var(--admin-text)] outline-none placeholder:text-[color:var(--admin-muted)]">

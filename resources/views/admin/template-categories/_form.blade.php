@@ -1,6 +1,5 @@
 @php
     $formTranslations = old('translations', $translations);
-    $routeQuery = request()->has('lang') ? ['lang' => request()->query('lang')] : [];
 @endphp
 
 @if ($errors->any())
@@ -143,7 +142,7 @@
 
     <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
         <a
-            href="{{ route('admin.template-categories.index', $routeQuery) }}"
+            href="{{ route('admin.template-categories.index') }}"
             class="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-5 text-sm font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]"
         >
             {{ trans('admin.template_categories.form.cancel') }}

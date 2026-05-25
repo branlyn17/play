@@ -21,16 +21,13 @@
 
                 <div class="flex w-full max-w-5xl flex-col gap-3 lg:items-end">
                     <a
-                        href="{{ route('admin.templates.create', request()->has('lang') ? ['lang' => request()->query('lang')] : []) }}"
+                        href="{{ route('admin.templates.create') }}"
                         class="inline-flex h-11 cursor-pointer items-center justify-center rounded-[1.1rem] bg-[color:var(--admin-primary)] px-4 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(79,124,255,0.22)] transition hover:brightness-110"
                     >
                         {{ trans('admin.templates.create.cta') }}
                     </a>
 
                     <form method="GET" action="{{ route('admin.templates.index') }}" class="w-full max-w-xl">
-                        @if (request()->has('lang'))
-                            <input type="hidden" name="lang" value="{{ request()->query('lang') }}">
-                        @endif
                         <div class="flex h-12 items-center gap-3 rounded-[1.2rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-strong)] px-4">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[color:var(--admin-muted)]"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
                             <input
@@ -130,19 +127,19 @@
                                 <td class="px-5 py-4 align-top">
                                     <div class="flex min-w-[12rem] flex-wrap gap-2">
                                         <a
-                                            href="{{ route('admin.templates.edit', array_merge(['template' => $template], request()->has('lang') ? ['lang' => request()->query('lang')] : [])) }}"
+                                            href="{{ route('admin.templates.edit', ['template' => $template]) }}"
                                             class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-[color:var(--admin-primary)] px-3 text-xs font-semibold text-white transition hover:brightness-110"
                                         >
                                             {{ trans('admin.templates.actions.edit') }}
                                         </a>
                                         <a
-                                            href="{{ route('admin.templates.download-html', array_merge(['template' => $template], request()->has('lang') ? ['lang' => request()->query('lang')] : [])) }}"
+                                            href="{{ route('admin.templates.download-html', ['template' => $template]) }}"
                                             class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-soft)] px-3 text-xs font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]"
                                         >
                                             HTML
                                         </a>
                                         <a
-                                            href="{{ route('admin.templates.download-json', array_merge(['template' => $template], request()->has('lang') ? ['lang' => request()->query('lang')] : [])) }}"
+                                            href="{{ route('admin.templates.download-json', ['template' => $template]) }}"
                                             class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-soft)] px-3 text-xs font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]"
                                         >
                                             JSON

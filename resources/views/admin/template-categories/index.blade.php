@@ -21,16 +21,13 @@
 
                 <div class="flex w-full max-w-5xl flex-col gap-3 lg:items-end">
                     <a
-                        href="{{ route('admin.template-categories.create', request()->has('lang') ? ['lang' => request()->query('lang')] : []) }}"
+                        href="{{ route('admin.template-categories.create') }}"
                         class="inline-flex h-11 cursor-pointer items-center justify-center rounded-[1.1rem] bg-[color:var(--admin-primary)] px-4 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(79,124,255,0.22)] transition hover:brightness-110"
                     >
                         {{ trans('admin.template_categories.create.cta') }}
                     </a>
 
                     <form method="GET" action="{{ route('admin.template-categories.index') }}" class="w-full max-w-xl">
-                        @if (request()->has('lang'))
-                            <input type="hidden" name="lang" value="{{ request()->query('lang') }}">
-                        @endif
                         <div class="flex h-12 items-center gap-3 rounded-[1.2rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-strong)] px-4">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[color:var(--admin-muted)]"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
                             <input
@@ -101,13 +98,13 @@
                                 <td class="px-5 py-4 align-top">
                                     <div class="flex min-w-[12rem] flex-wrap gap-2">
                                         <a
-                                            href="{{ route('admin.template-categories.edit', array_merge(['templateCategory' => $category], request()->has('lang') ? ['lang' => request()->query('lang')] : [])) }}"
+                                            href="{{ route('admin.template-categories.edit', ['templateCategory' => $category]) }}"
                                             class="inline-flex h-9 items-center justify-center rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-soft)] px-3 text-sm font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]"
                                         >
                                             {{ trans('admin.template_categories.actions.edit') }}
                                         </a>
 
-                                        <form method="POST" action="{{ route('admin.template-categories.destroy', array_merge(['templateCategory' => $category], request()->has('lang') ? ['lang' => request()->query('lang')] : [])) }}" onsubmit="return confirm('{{ trans('admin.template_categories.actions.confirm_delete') }}')">
+                                        <form method="POST" action="{{ route('admin.template-categories.destroy', ['templateCategory' => $category]) }}" onsubmit="return confirm('{{ trans('admin.template_categories.actions.confirm_delete') }}')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-rose-400/10 px-3 text-sm font-semibold text-rose-300 transition hover:bg-rose-400/15">

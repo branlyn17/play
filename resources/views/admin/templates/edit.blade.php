@@ -2,7 +2,6 @@
 
 @section('content')
     @php
-        $langQuery = request()->has('lang') ? ['lang' => request()->query('lang')] : [];
         $designTokens = $template->design_tokens ?? [];
         $selectedCategory = old('category_key', $template->category?->key);
         $selectedAccent = old('catalog_accent', $designTokens['accent'] ?? 'sky');
@@ -22,19 +21,19 @@
 
                 <div class="flex flex-wrap gap-2">
                     <a
-                        href="{{ route('admin.templates.download-html', array_merge(['template' => $template], $langQuery)) }}"
+                        href="{{ route('admin.templates.download-html', ['template' => $template]) }}"
                         class="inline-flex h-11 cursor-pointer items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-strong)] px-4 text-sm font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-soft)]"
                     >
                         {{ trans('admin.templates.edit.download_html') }}
                     </a>
                     <a
-                        href="{{ route('admin.templates.download-json', array_merge(['template' => $template], $langQuery)) }}"
+                        href="{{ route('admin.templates.download-json', ['template' => $template]) }}"
                         class="inline-flex h-11 cursor-pointer items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-strong)] px-4 text-sm font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-soft)]"
                     >
                         {{ trans('admin.templates.edit.download_json') }}
                     </a>
                     <a
-                        href="{{ route('admin.templates.index', $langQuery) }}"
+                        href="{{ route('admin.templates.index') }}"
                         class="inline-flex h-11 cursor-pointer items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-4 text-sm font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]"
                     >
                         {{ trans('admin.templates.edit.back') }}
@@ -54,7 +53,7 @@
             </section>
         @endif
 
-        <form method="POST" action="{{ route('admin.templates.update', array_merge(['template' => $template], $langQuery)) }}" enctype="multipart/form-data" class="space-y-5">
+        <form method="POST" action="{{ route('admin.templates.update', ['template' => $template]) }}" enctype="multipart/form-data" class="space-y-5">
             @csrf
             @method('PUT')
 
@@ -141,10 +140,10 @@
                             <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--admin-muted)]">{{ trans('admin.templates.edit.downloads_title') }}</h3>
                             <p class="mt-2 text-sm leading-7 text-[color:var(--admin-text-soft)]">{{ trans('admin.templates.edit.downloads_help') }}</p>
                             <div class="mt-4 flex flex-wrap gap-2">
-                                <a href="{{ route('admin.templates.download-html', array_merge(['template' => $template], $langQuery)) }}" class="inline-flex h-10 cursor-pointer items-center rounded-xl border border-[color:var(--admin-border)] px-3 text-sm font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]">
+                                <a href="{{ route('admin.templates.download-html', ['template' => $template]) }}" class="inline-flex h-10 cursor-pointer items-center rounded-xl border border-[color:var(--admin-border)] px-3 text-sm font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]">
                                     {{ trans('admin.templates.edit.download_html') }}
                                 </a>
-                                <a href="{{ route('admin.templates.download-json', array_merge(['template' => $template], $langQuery)) }}" class="inline-flex h-10 cursor-pointer items-center rounded-xl border border-[color:var(--admin-border)] px-3 text-sm font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]">
+                                <a href="{{ route('admin.templates.download-json', ['template' => $template]) }}" class="inline-flex h-10 cursor-pointer items-center rounded-xl border border-[color:var(--admin-border)] px-3 text-sm font-semibold text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]">
                                     {{ trans('admin.templates.edit.download_json') }}
                                 </a>
                             </div>

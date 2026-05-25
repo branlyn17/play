@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\Localization\JsonFallbackTranslator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,7 +13,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->extend('translator', function ($translator, $app) {
+            $custom = new JsonFallbackTranslator($translator->getLoader(), $translator->getLocale());
+            $custom->setFallback($translator->getFallback());
+
+            return $custom;
+        });
     }
 
     /**

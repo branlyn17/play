@@ -6,12 +6,12 @@ class PublicPage
 {
     public static function defaultLocale(): string
     {
-        return config('locales.default', 'es');
+        return LocaleConfig::default();
     }
 
     public static function supportedLocales(): array
     {
-        return array_keys(config('locales.supported', []));
+        return LocaleConfig::codes();
     }
 
     public static function localePattern(): string
@@ -33,12 +33,14 @@ class PublicPage
     {
         $options = [];
 
-        foreach (config('locales.supported', []) as $code => $meta) {
+        foreach (LocaleConfig::supported() as $code => $meta) {
             $options[] = [
                 'code' => $code,
                 'label' => $meta['label'],
                 'name' => $meta['name'],
+                'nativeName' => $meta['native_name'],
                 'flag' => $meta['flag'],
+                'direction' => $meta['direction'],
                 'href' => route(self::routeName($page, $code)),
             ];
         }

@@ -1,5 +1,8 @@
+@php
+    use App\Support\Localization\LocaleConfig;
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-admin-theme="dark" data-admin-sidebar="open" data-admin-fullscreen="off">
+<html lang="{{ LocaleConfig::htmlLang() }}" dir="{{ LocaleConfig::direction() }}" data-admin-theme="dark" data-admin-sidebar="open" data-admin-fullscreen="off">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -137,8 +140,8 @@
     </head>
     <body class="min-h-screen overflow-x-hidden bg-[color:var(--admin-bg)] text-[color:var(--admin-text)] antialiased">
         @php
-            $supportedLocales = config('locales.supported', []);
-            $localeQuery = request()->query();
+            $supportedLocales = LocaleConfig::supported();
+            $currentLocale = LocaleConfig::current();
             $sidebarSections = [
                 ['key' => 'overview', 'icon' => 'grid', 'items' => ['dashboard'], 'expanded' => true],
                 ['key' => 'catalog', 'icon' => 'cube', 'items' => ['templates', 'catalog', 'template_analytics', 'categories', 'plans'], 'expanded' => true],
@@ -147,21 +150,28 @@
                 ['key' => 'growth', 'icon' => 'chart', 'items' => ['analytics', 'translations'], 'expanded' => false],
                 ['key' => 'system', 'icon' => 'settings', 'items' => ['settings'], 'expanded' => false],
             ];
-            $localeLinks = collect($supportedLocales)->map(function ($meta, $code) use ($localeQuery) {
+            $segments = request()->segments();
+            $localeLinks = collect($supportedLocales)->map(function ($meta, $code) use ($segments) {
+                $localizedSegments = $segments;
+                $localizedSegments[0] = $code;
+                $path = implode('/', $localizedSegments);
+                $query = request()->query() ? '?'.http_build_query(request()->query()) : '';
+
                 return [
                     'code' => $code,
                     'label' => $meta['label'],
                     'name' => $meta['name'],
+                    'native_name' => $meta['native_name'],
                     'flag' => $meta['flag'],
-                    'href' => request()->url().'?'.http_build_query(array_merge($localeQuery, ['lang' => $code])),
+                    'direction' => $meta['direction'],
+                    'href' => url($path).$query,
                 ];
             })->values()->all();
-            $adminRouteQuery = request()->has('lang') ? ['lang' => request()->query('lang')] : [];
             $sidebarItemRoutes = [
-                'dashboard' => route('admin.dashboard', $adminRouteQuery),
-                'templates' => route('admin.templates.index', $adminRouteQuery),
-                'catalog' => route('admin.template-categories.index', $adminRouteQuery),
-                'template_analytics' => route('admin.template-analytics.index', $adminRouteQuery),
+                'dashboard' => route('admin.dashboard'),
+                'templates' => route('admin.templates.index'),
+                'catalog' => route('admin.template-categories.index'),
+                'template_analytics' => route('admin.template-analytics.index'),
             ];
             $activeSidebarItem = request()->routeIs('admin.templates.*')
                 ? 'templates'
@@ -286,7 +296,7 @@
                                     <div class="relative" data-admin-locale-wrap>
                                         <button id="admin-locale-toggle-desktop" type="button" class="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] px-3 text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]" aria-label="{{ trans('admin.language') }}">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"></path></svg>
-                                            <span class="text-sm font-semibold">{{ $supportedLocales[app()->getLocale()]['label'] ?? strtoupper(app()->getLocale()) }}</span>
+                                            <span class="text-sm font-semibold">{{ $supportedLocales[$currentLocale]['label'] ?? strtoupper($currentLocale) }}</span>
                                         </button>
                                     </div>
                                     <button id="admin-theme-toggle" type="button" class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[1.1rem] border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface-strong)]" aria-label="{{ trans('admin.theme_toggle') }}">
@@ -331,7 +341,7 @@
                                 @foreach ($localeLinks as $item)
                                     <a href="{{ $item['href'] }}" class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[color:var(--admin-text)] transition hover:bg-[color:var(--admin-surface)]">
                                         <span class="text-base">{{ $item['flag'] }}</span>
-                                        <span>{{ $item['name'] }}</span>
+                                        <span dir="{{ $item['direction'] }}">{{ $item['native_name'] }}</span>
                                         <span class="ml-auto text-xs uppercase tracking-[0.18em] text-[color:var(--admin-muted)]">{{ $item['label'] }}</span>
                                     </a>
                                 @endforeach

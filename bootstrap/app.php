@@ -1,7 +1,6 @@
 <?php
 
-use App\Http\Middleware\SetLocaleFromPath;
-use App\Http\Middleware\SetAdminLocale;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,8 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'set.locale' => SetLocaleFromPath::class,
-            'set.admin.locale' => SetAdminLocale::class,
+            'set.locale' => SetLocale::class,
+            'set.admin.locale' => SetLocale::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,

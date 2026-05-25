@@ -3,13 +3,14 @@
 namespace App\Support\Auth;
 
 use App\Models\User;
+use App\Support\Localization\LocaleConfig;
 use App\Support\Localization\PublicPage;
 
 class UserDestination
 {
     public static function publicHome(?string $locale = null): string
     {
-        $resolvedLocale = $locale ?: PublicPage::defaultLocale();
+        $resolvedLocale = $locale ?: LocaleConfig::current();
 
         return route(PublicPage::routeName('home', $resolvedLocale));
     }
@@ -17,7 +18,7 @@ class UserDestination
     public static function for(User $user, ?string $fallback = null): string
     {
         if ($user->hasRole('superadmin')) {
-            return route('admin.dashboard');
+            return route('admin.dashboard', ['locale' => LocaleConfig::current()]);
         }
 
         return $fallback ?: self::publicHome();
@@ -30,7 +31,10 @@ class UserDestination
         if (! $resolvedUser instanceof User) {
             return [
                 'authenticated' => false,
-                'loginUrl' => route('login', ['redirect' => request()->getRequestUri()]),
+                'loginUrl' => route('login', [
+                    'locale' => LocaleConfig::current(),
+                    'redirect' => request()->getRequestUri(),
+                ]),
             ];
         }
 
@@ -38,8 +42,10 @@ class UserDestination
             'authenticated' => true,
             'displayName' => $resolvedUser->display_name ?: $resolvedUser->name,
             'primaryRole' => $resolvedUser->getRoleNames()->first(),
-            'dashboardUrl' => $resolvedUser->hasRole('superadmin') ? route('admin.dashboard') : null,
-            'logoutUrl' => route('logout'),
+            'dashboardUrl' => $resolvedUser->hasRole('superadmin')
+                ? route('admin.dashboard', ['locale' => LocaleConfig::current()])
+                : null,
+            'logoutUrl' => route('logout', ['locale' => LocaleConfig::current()]),
         ];
     }
 
