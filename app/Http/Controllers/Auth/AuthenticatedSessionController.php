@@ -23,6 +23,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         return view('auth.login', [
+            'title' => __('auth.login.page_title'),
             'redirectTo' => UserDestination::isSafePublicRedirect($request->query('redirect'))
                 ? $request->query('redirect')
                 : UserDestination::publicHome(),
@@ -44,7 +45,7 @@ class AuthenticatedSessionController extends Controller
         if (! Auth::attempt($credentials, $remember)) {
             return back()
                 ->withErrors([
-                    'email' => __('Las credenciales proporcionadas no son correctas.'),
+                    'email' => __('errors.auth.invalid_credentials'),
                 ])
                 ->onlyInput('email');
         }

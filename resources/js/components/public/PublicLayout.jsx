@@ -1,11 +1,12 @@
 import Footer from './Footer';
 import Header from './Header';
 
-export default function PublicLayout({ children, appName, auth, footerCopy, headerProps, theme }) {
+export default function PublicLayout({ children, appName, auth, direction = 'ltr', footerCopy, headerProps, theme }) {
     const isLight = theme === 'light';
 
     return (
         <div
+            dir={direction}
             className={`relative min-h-screen overflow-hidden transition-colors duration-500 ${
                 isLight ? 'bg-[#eef6ff] text-slate-950' : 'bg-[#0f1833] text-white'
             }`}
@@ -24,7 +25,7 @@ export default function PublicLayout({ children, appName, auth, footerCopy, head
             </div>
 
             <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-                <Header appName={appName} auth={auth} theme={theme} {...headerProps} />
+                <Header appName={appName} auth={auth} direction={direction} theme={theme} {...headerProps} />
                 <main className="flex-1 space-y-6 pb-8">{children}</main>
                 <Footer appName={appName} copy={footerCopy} theme={theme} />
             </div>

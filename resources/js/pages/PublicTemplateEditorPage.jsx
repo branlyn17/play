@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import PublicLayout from '../components/public/PublicLayout';
+import { createTranslator } from '../lib/i18n';
 
 const fontLinks = {
     Sora: 'https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap',
@@ -36,28 +37,114 @@ const emptyMedia = {
     gallery: [],
 };
 
-function normalizeContent(content = {}) {
+function normalizeContent(content = {}, t) {
+    const tips = Array.isArray(content.tips) && content.tips.length > 0
+        ? content.tips
+        : ['', '', ''];
+
     return {
-        header: content.header ?? {},
-        hero: content.hero ?? {},
-        actions: content.actions ?? {},
-        panels: content.panels ?? {},
-        fields: content.fields ?? {},
-        stats: content.stats ?? {},
-        badges: content.badges ?? {},
-        status: content.status ?? {},
-        preview: content.preview ?? {},
-        tips: content.tips ?? [],
+        header: {
+            kicker: t('public.template_editor.header.kicker', content.header?.kicker ?? ''),
+            cta: t('public.template_editor.header.cta', content.header?.cta ?? ''),
+        },
+        hero: {
+            eyebrow: t('public.template_editor.hero.eyebrow', content.hero?.eyebrow ?? ''),
+            title: t('public.template_editor.hero.title', content.hero?.title ?? ''),
+            subtitle: t('public.template_editor.hero.subtitle', content.hero?.subtitle ?? ''),
+        },
+        actions: {
+            download: t('public.template_editor.actions.download', content.actions?.download ?? ''),
+            save: t('public.template_editor.actions.save', content.actions?.save ?? ''),
+            reset: t('public.template_editor.actions.reset', content.actions?.reset ?? ''),
+            open_catalog: t('public.template_editor.actions.open_catalog', content.actions?.open_catalog ?? ''),
+        },
+        panels: {
+            content: t('public.template_editor.panels.content', content.panels?.content ?? ''),
+            style: t('public.template_editor.panels.style', content.panels?.style ?? ''),
+            visibility: t('public.template_editor.panels.visibility', content.panels?.visibility ?? ''),
+            media: t('public.template_editor.panels.media', content.panels?.media ?? ''),
+            preview: t('public.template_editor.panels.preview', content.panels?.preview ?? ''),
+            tips: t('public.template_editor.panels.tips', content.panels?.tips ?? ''),
+        },
+        fields: {
+            event_label: t('public.template_editor.fields.event_label', content.fields?.event_label ?? ''),
+            headline: t('public.template_editor.fields.headline', content.fields?.headline ?? ''),
+            subheadline: t('public.template_editor.fields.subheadline', content.fields?.subheadline ?? ''),
+            hosts: t('public.template_editor.fields.hosts', content.fields?.hosts ?? ''),
+            date_label: t('public.template_editor.fields.date_label', content.fields?.date_label ?? ''),
+            time_label: t('public.template_editor.fields.time_label', content.fields?.time_label ?? ''),
+            venue_label: t('public.template_editor.fields.venue_label', content.fields?.venue_label ?? ''),
+            message: t('public.template_editor.fields.message', content.fields?.message ?? ''),
+            closing: t('public.template_editor.fields.closing', content.fields?.closing ?? ''),
+            button_label: t('public.template_editor.fields.button_label', content.fields?.button_label ?? ''),
+            guest_name: t('public.template_editor.fields.guest_name', content.fields?.guest_name ?? ''),
+            event_type: t('public.template_editor.fields.event_type', content.fields?.event_type ?? ''),
+            event_name: t('public.template_editor.fields.event_name', content.fields?.event_name ?? ''),
+            dress_code: t('public.template_editor.fields.dress_code', content.fields?.dress_code ?? ''),
+            rsvp_deadline: t('public.template_editor.fields.rsvp_deadline', content.fields?.rsvp_deadline ?? ''),
+            timezone_label: t('public.template_editor.fields.timezone_label', content.fields?.timezone_label ?? ''),
+            venue_name: t('public.template_editor.fields.venue_name', content.fields?.venue_name ?? ''),
+            venue_address: t('public.template_editor.fields.venue_address', content.fields?.venue_address ?? ''),
+            google_maps_url: t('public.template_editor.fields.google_maps_url', content.fields?.google_maps_url ?? ''),
+            apple_maps_url: t('public.template_editor.fields.apple_maps_url', content.fields?.apple_maps_url ?? ''),
+            map_button_label: t('public.template_editor.fields.map_button_label', content.fields?.map_button_label ?? ''),
+            accent_color: t('public.template_editor.fields.accent_color', content.fields?.accent_color ?? ''),
+            background_color: t('public.template_editor.fields.background_color', content.fields?.background_color ?? ''),
+            surface_color: t('public.template_editor.fields.surface_color', content.fields?.surface_color ?? ''),
+            text_color: t('public.template_editor.fields.text_color', content.fields?.text_color ?? ''),
+            font_family: t('public.template_editor.fields.font_family', content.fields?.font_family ?? ''),
+            show_guest_name: t('public.template_editor.fields.show_guest_name', content.fields?.show_guest_name ?? ''),
+            show_event_details: t('public.template_editor.fields.show_event_details', content.fields?.show_event_details ?? ''),
+            show_location: t('public.template_editor.fields.show_location', content.fields?.show_location ?? ''),
+            show_hero_image: t('public.template_editor.fields.show_hero_image', content.fields?.show_hero_image ?? ''),
+            show_gallery: t('public.template_editor.fields.show_gallery', content.fields?.show_gallery ?? ''),
+            hero_image_url: t('public.template_editor.fields.hero_image_url', content.fields?.hero_image_url ?? ''),
+            hero_image_alt: t('public.template_editor.fields.hero_image_alt', content.fields?.hero_image_alt ?? ''),
+            background_image_url: t('public.template_editor.fields.background_image_url', content.fields?.background_image_url ?? ''),
+            background_image_alt: t('public.template_editor.fields.background_image_alt', content.fields?.background_image_alt ?? ''),
+            gallery_image_url: t('public.template_editor.fields.gallery_image_url', content.fields?.gallery_image_url ?? ''),
+            gallery_image_alt: t('public.template_editor.fields.gallery_image_alt', content.fields?.gallery_image_alt ?? ''),
+            gallery_image_caption: t('public.template_editor.fields.gallery_image_caption', content.fields?.gallery_image_caption ?? ''),
+            add_gallery_image: t('public.template_editor.fields.add_gallery_image', content.fields?.add_gallery_image ?? ''),
+            remove_gallery_image: t('public.template_editor.fields.remove_gallery_image', content.fields?.remove_gallery_image ?? ''),
+        },
+        stats: {
+            views: t('public.template_editor.stats.views', content.stats?.views ?? ''),
+            downloads: t('public.template_editor.stats.downloads', content.stats?.downloads ?? ''),
+            uses: t('public.template_editor.stats.uses', content.stats?.uses ?? ''),
+        },
+        badges: {
+            premium: t('public.template_editor.badges.premium', content.badges?.premium ?? ''),
+            base: t('public.template_editor.badges.base', content.badges?.base ?? ''),
+        },
+        status: {
+            saving: t('public.template_editor.status.saving', content.status?.saving ?? ''),
+            saved: t('public.template_editor.status.saved', content.status?.saved ?? ''),
+            downloaded: t('public.template_editor.status.downloaded', content.status?.downloaded ?? ''),
+            save_failed: t('public.template_editor.status.save_failed', content.status?.save_failed ?? ''),
+        },
+        preview: {
+            edit_token: t('public.template_editor.preview.edit_token', content.preview?.edit_token ?? ''),
+        },
+        tips: tips.map((tip, index) => t(`public.template_editor.tips.${index}`, tip ?? '')).filter(Boolean),
+        uiLabels: {
+            theme_toggle: t('public.shared.header.theme_toggle', ''),
+            language: t('public.shared.header.language', ''),
+            menu: t('public.shared.header.menu', ''),
+            close: t('public.shared.header.close', ''),
+            dashboard: t('common.dashboard', ''),
+            logout: t('actions.logout', ''),
+        },
     };
 }
 
-function normalizeDictionary(dictionary = {}) {
+function normalizeDictionary(dictionary = {}, fallbackLabels = {}) {
     return {
         labels: {
-            hosts: dictionary.labels?.hosts ?? 'Hosts',
-            date: dictionary.labels?.date ?? 'Date',
-            time: dictionary.labels?.time ?? 'Time',
-            venue: dictionary.labels?.venue ?? 'Venue',
+            hosts: dictionary.labels?.hosts ?? fallbackLabels.hosts ?? 'Hosts',
+            date: dictionary.labels?.date ?? fallbackLabels.date ?? 'Date',
+            time: dictionary.labels?.time ?? fallbackLabels.time ?? 'Time',
+            venue: dictionary.labels?.venue ?? fallbackLabels.venue ?? 'Venue',
         },
     };
 }
@@ -292,7 +379,7 @@ function renderUploadedHtmlTemplate(sourceHtml, state, locale, dictionary) {
     return setHtmlLanguage(documentHtml, locale);
 }
 
-function generateHtmlDocument(state, template, locale, dictionary) {
+function generateHtmlDocument(state, template, locale, dictionary, previewLabels) {
     if (template.htmlSource) {
         return renderUploadedHtmlTemplate(template.htmlSource, state, locale, dictionary);
     }
@@ -303,9 +390,6 @@ function generateHtmlDocument(state, template, locale, dictionary) {
     const labels = normalizeDictionary(dictionary).labels;
     const visibility = normalizeVisibility(state._visibility);
     const media = normalizeMedia(state._media);
-    const editorLabels = locale === 'en'
-        ? { guest: 'Guest', type: 'Type', event: 'Event', timezone: 'Timezone', map: 'View location' }
-        : { guest: 'Invitado', type: 'Tipo', event: 'Evento', timezone: 'Zona horaria', map: 'Ver ubicacion' };
     const safeTitle = escapeHtml(state.headline);
 
     return `<!DOCTYPE html>
@@ -479,15 +563,15 @@ function generateHtmlDocument(state, template, locale, dictionary) {
         </section>
         <section class="content">
             ${visibility.showGuestName && state.guestName ? `<div class="card">
-                <p class="label">${editorLabels.guest}</p>
+                <p class="label">${previewLabels.guest}</p>
                 <p class="value">${formatHtmlText(state.guestName)}</p>
             </div>` : ''}
             ${visibility.showEventDetails ? `<div class="meta">
-                ${state.eventType ? `<div class="card"><p class="label">${editorLabels.type}</p><p class="value">${formatHtmlText(state.eventType)}</p></div>` : ''}
-                ${state.eventName ? `<div class="card"><p class="label">${editorLabels.event}</p><p class="value">${formatHtmlText(state.eventName)}</p></div>` : ''}
-                ${state.dressCode ? `<div class="card"><p class="label">Dress code</p><p class="value">${formatHtmlText(state.dressCode)}</p></div>` : ''}
-                ${state.rsvpDeadline ? `<div class="card"><p class="label">RSVP</p><p class="value">${formatHtmlText(state.rsvpDeadline)}</p></div>` : ''}
-                ${state.timezoneLabel ? `<div class="card"><p class="label">${editorLabels.timezone}</p><p class="value">${formatHtmlText(state.timezoneLabel)}</p></div>` : ''}
+                ${state.eventType ? `<div class="card"><p class="label">${previewLabels.type}</p><p class="value">${formatHtmlText(state.eventType)}</p></div>` : ''}
+                ${state.eventName ? `<div class="card"><p class="label">${previewLabels.event}</p><p class="value">${formatHtmlText(state.eventName)}</p></div>` : ''}
+                ${state.dressCode ? `<div class="card"><p class="label">${previewLabels.dressCode}</p><p class="value">${formatHtmlText(state.dressCode)}</p></div>` : ''}
+                ${state.rsvpDeadline ? `<div class="card"><p class="label">${previewLabels.rsvp}</p><p class="value">${formatHtmlText(state.rsvpDeadline)}</p></div>` : ''}
+                ${state.timezoneLabel ? `<div class="card"><p class="label">${previewLabels.timezone}</p><p class="value">${formatHtmlText(state.timezoneLabel)}</p></div>` : ''}
             </div>` : ''}
             <div class="card">
                 <p class="label">${escapeHtml(labels.hosts)}</p>
@@ -510,8 +594,8 @@ function generateHtmlDocument(state, template, locale, dictionary) {
             ${visibility.showLocation ? `<div class="card">
                 <p class="label">${escapeHtml(state.venueName || labels.venue)}</p>
                 <p class="value">${formatHtmlText(state.venueAddress || state.venueLabel)}</p>
-                ${state.googleMapsUrl ? `<a class="cta" href="${escapeHtml(state.googleMapsUrl)}">${escapeHtml(state.mapButtonLabel || editorLabels.map)}</a>` : ''}
-                ${state.appleMapsUrl ? `<a class="cta" href="${escapeHtml(state.appleMapsUrl)}" style="margin-left: 8px;">Apple Maps</a>` : ''}
+                ${state.googleMapsUrl ? `<a class="cta" href="${escapeHtml(state.googleMapsUrl)}">${escapeHtml(state.mapButtonLabel || previewLabels.map)}</a>` : ''}
+                ${state.appleMapsUrl ? `<a class="cta" href="${escapeHtml(state.appleMapsUrl)}" style="margin-left: 8px;">${previewLabels.appleMaps}</a>` : ''}
             </div>` : ''}
             <div class="card">
                 <p class="message">${formatHtmlText(state.message)}</p>
@@ -530,6 +614,7 @@ function generateHtmlDocument(state, template, locale, dictionary) {
 export default function PublicTemplateEditorPage({
     appName,
     auth = {},
+    i18n = {},
     locale = 'es',
     locales = [],
     navigation = [],
@@ -541,8 +626,15 @@ export default function PublicTemplateEditorPage({
 }) {
     const [theme, setTheme] = useState('dark');
     const iframeRef = useRef(null);
-    const current = useMemo(() => normalizeContent(content), [content]);
-    const dictionary = useMemo(() => normalizeDictionary(template.dictionary), [template.dictionary]);
+    const t = useMemo(() => createTranslator(i18n), [i18n]);
+    const current = useMemo(() => normalizeContent(content, t), [content, t]);
+    const dictionaryFallbacks = useMemo(() => ({
+        hosts: current.fields.hosts || 'Hosts',
+        date: current.fields.date_label || 'Date',
+        time: current.fields.time_label || 'Time',
+        venue: current.fields.venue_label || 'Venue',
+    }), [current.fields]);
+    const dictionary = useMemo(() => normalizeDictionary(template.dictionary, dictionaryFallbacks), [dictionaryFallbacks, template.dictionary]);
     const contentFields = useMemo(() => (template.editorFields ?? []).filter((field) => field.group === 'content'), [template.editorFields]);
     const styleFields = useMemo(() => (template.editorFields ?? []).filter((field) => field.group === 'style'), [template.editorFields]);
     const visibilityFields = useMemo(() => (template.editorFields ?? []).filter((field) => field.group === 'visibility'), [template.editorFields]);
@@ -575,7 +667,21 @@ export default function PublicTemplateEditorPage({
     }, [template.downloadCount]);
 
     const isLight = theme === 'light';
-    const htmlDocument = useMemo(() => generateHtmlDocument(editorState, template, locale, dictionary), [dictionary, editorState, locale, template]);
+    const direction = i18n.direction ?? 'ltr';
+    const previewLabels = useMemo(() => ({
+        guest: current.fields.guest_name || t('common.guest'),
+        type: current.fields.event_type || t('common.type'),
+        event: current.fields.event_name || t('common.event'),
+        timezone: current.fields.timezone_label || t('common.timezone'),
+        map: current.fields.map_button_label || t('common.view_location'),
+        dressCode: current.fields.dress_code || t('common.dress_code'),
+        rsvp: current.fields.rsvp_deadline || t('common.rsvp'),
+        appleMaps: t('common.apple_maps'),
+    }), [current.fields, t]);
+    const htmlDocument = useMemo(
+        () => generateHtmlDocument(editorState, template, locale, dictionary, previewLabels),
+        [dictionary, editorState, locale, previewLabels, template],
+    );
     const catalogHref = navigation.find((item) => item.key === 'catalog')?.href ?? '#';
 
     useEffect(() => {
@@ -749,6 +855,7 @@ export default function PublicTemplateEditorPage({
         <PublicLayout
             appName={appName}
             auth={auth}
+            direction={direction}
             footerCopy={{
                 left: template.name,
                 right: template.teaser ?? template.description ?? '',
@@ -770,7 +877,10 @@ export default function PublicTemplateEditorPage({
                     kicker: current.header.kicker ?? '',
                     cta: current.header.cta ?? '',
                 },
-                uiLabels: shared.header ?? {},
+                uiLabels: {
+                    ...(shared.header ?? {}),
+                    ...current.uiLabels,
+                },
             }}
         >
             <section className="px-2 pt-4">
@@ -933,7 +1043,7 @@ export default function PublicTemplateEditorPage({
                                     {normalizeMedia(editorState._media).gallery.map((item, index) => (
                                         <div key={index} className={`rounded-2xl border p-3 ${isLight ? 'border-slate-200 bg-slate-50' : 'border-white/10 bg-slate-900/45'}`}>
                                             <div className="flex items-center justify-between gap-3">
-                                                <span className={`text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>Gallery {index + 1}</span>
+                                                <span className={`text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-slate-500' : 'text-white/50'}`}>{current.panels.media} {index + 1}</span>
                                                 <button type="button" onClick={() => removeGalleryItem(index)} className="text-xs font-semibold text-rose-400">
                                                     {current.fields.remove_gallery_image}
                                                 </button>
@@ -1049,7 +1159,7 @@ export default function PublicTemplateEditorPage({
                                 </div>
                                 <iframe
                                     ref={iframeRef}
-                                    title={`${template.name} preview`}
+                                    title={`${template.name} ${current.panels.preview}`}
                                     srcDoc={htmlDocument}
                                     onLoad={updatePreviewHeight}
                                     className="w-full bg-white"

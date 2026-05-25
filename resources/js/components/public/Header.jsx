@@ -53,17 +53,20 @@ function ThemeMoonIcon() {
     );
 }
 
-export default function Header({ appName, auth = {}, navItems, locale, locales, onLocaleChange, labels, uiLabels = {}, theme, onThemeToggle }) {
+export default function Header({ appName, auth = {}, direction = 'ltr', navItems, locale, locales, onLocaleChange, labels, uiLabels = {}, theme, onThemeToggle }) {
     const isLight = theme === 'light';
+    const isRtl = direction === 'rtl';
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLocaleOpen, setIsLocaleOpen] = useState(false);
     const localeRef = useRef(null);
     const activeLocale = useMemo(() => locales.find((item) => item.code === locale) ?? locales[0], [locale, locales]);
     const headerUi = {
-        themeToggle: uiLabels.theme_toggle ?? 'Toggle theme',
-        language: uiLabels.language ?? 'Language',
-        menu: uiLabels.menu ?? 'Menu',
-        close: uiLabels.close ?? 'Close',
+        themeToggle: uiLabels.theme_toggle ?? 'public.shared.header.theme_toggle',
+        language: uiLabels.language ?? 'public.shared.header.language',
+        menu: uiLabels.menu ?? 'public.shared.header.menu',
+        close: uiLabels.close ?? 'public.shared.header.close',
+        dashboard: uiLabels.dashboard ?? 'common.dashboard',
+        logout: uiLabels.logout ?? 'actions.logout',
     };
     const userLabel = auth.displayName ?? '';
     const isAuthenticated = Boolean(auth.authenticated);
@@ -164,7 +167,9 @@ export default function Header({ appName, auth = {}, navItems, locale, locales, 
 
                             {isLocaleOpen ? (
                                 <div
-                                    className={`absolute right-0 top-[calc(100%+0.6rem)] min-w-48 rounded-2xl border p-2 shadow-[0_18px_40px_rgba(15,23,42,0.14)] ${
+                                    className={`absolute top-[calc(100%+0.6rem)] min-w-48 rounded-2xl border p-2 shadow-[0_18px_40px_rgba(15,23,42,0.14)] ${
+                                        isRtl ? 'left-0' : 'right-0'
+                                    } ${
                                         isLight ? 'border-slate-200 bg-white' : 'border-white/10 bg-slate-900/95'
                                     }`}
                                 >
@@ -176,7 +181,9 @@ export default function Header({ appName, auth = {}, navItems, locale, locales, 
                                                 onLocaleChange(item.code);
                                                 setIsLocaleOpen(false);
                                             }}
-                                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+                                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition ${
+                                                isRtl ? 'text-right' : 'text-left'
+                                            } ${
                                                 locale === item.code
                                                     ? isLight
                                                         ? 'bg-indigo-50 text-indigo-700'
@@ -187,8 +194,8 @@ export default function Header({ appName, auth = {}, navItems, locale, locales, 
                                             }`}
                                         >
                                             <span className="text-base">{item.flag}</span>
-                                            <span className="text-sm font-medium">{item.name}</span>
-                                            <span className="ml-auto text-xs uppercase tracking-[0.2em] opacity-60">{item.label}</span>
+                                            <span className="text-sm font-medium">{item.nativeName ?? item.name}</span>
+                                            <span className={`${isRtl ? 'mr-auto' : 'ml-auto'} text-xs uppercase tracking-[0.2em] opacity-60`}>{item.label}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -210,7 +217,7 @@ export default function Header({ appName, auth = {}, navItems, locale, locales, 
                                                 : 'bg-white text-slate-950 hover:bg-slate-100'
                                         }`}
                                     >
-                                        Panel
+                                        {headerUi.dashboard}
                                     </a>
                                 ) : null}
 
@@ -223,7 +230,7 @@ export default function Header({ appName, auth = {}, navItems, locale, locales, 
                                             : 'bg-white/8 text-white hover:bg-white/12'
                                     }`}
                                 >
-                                    Salir
+                                    {headerUi.logout}
                                 </button>
                             </div>
                         ) : (
@@ -305,7 +312,9 @@ export default function Header({ appName, auth = {}, navItems, locale, locales, 
                                         onLocaleChange(item.code);
                                         setIsMenuOpen(false);
                                     }}
-                                    className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-left transition ${
+                                    className={`flex items-center gap-3 rounded-2xl px-4 py-3 transition ${
+                                        isRtl ? 'text-right' : 'text-left'
+                                    } ${
                                         locale === item.code
                                             ? isLight
                                                 ? 'bg-indigo-600 text-white'
@@ -316,8 +325,8 @@ export default function Header({ appName, auth = {}, navItems, locale, locales, 
                                     }`}
                                 >
                                     <span className="text-base">{item.flag}</span>
-                                    <span className="font-medium">{item.name}</span>
-                                    <span className="ml-auto text-xs uppercase tracking-[0.2em] opacity-60">{item.label}</span>
+                                    <span className="font-medium">{item.nativeName ?? item.name}</span>
+                                    <span className={`${isRtl ? 'mr-auto' : 'ml-auto'} text-xs uppercase tracking-[0.2em] opacity-60`}>{item.label}</span>
                                 </button>
                             ))}
                         </div>
@@ -338,7 +347,7 @@ export default function Header({ appName, auth = {}, navItems, locale, locales, 
                                             : 'bg-white text-slate-950 hover:bg-slate-100'
                                     }`}
                                 >
-                                    Panel
+                                    {headerUi.dashboard}
                                 </a>
                             ) : null}
 
@@ -351,7 +360,7 @@ export default function Header({ appName, auth = {}, navItems, locale, locales, 
                                         : 'bg-white/8 text-white hover:bg-white/12'
                                 }`}
                             >
-                                Salir
+                                {headerUi.logout}
                             </button>
                         </div>
                     ) : (

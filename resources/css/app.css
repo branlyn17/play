@@ -71,3 +71,43 @@
         backdrop-filter: blur(18px);
     }
 }
+
+@layer base {
+    html[dir='rtl'] body {
+        text-align: right;
+    }
+
+    html[dir='rtl'] input,
+    html[dir='rtl'] textarea,
+    html[dir='rtl'] select {
+        text-align: right;
+    }
+}
+
+@layer components {
+    html[dir='rtl'] #admin-sidebar {
+        left: auto;
+        right: 1rem;
+        transform-origin: top right;
+    }
+
+    html[dir='rtl'] #admin-sidebar.-translate-x-full {
+        transform: translateX(110%);
+    }
+
+    html[dir='rtl'] #admin-sidebar.translate-x-0 {
+        transform: translateX(0);
+    }
+
+    html[dir='rtl'] #admin-locale-menu,
+    html[dir='rtl'] #admin-profile-menu,
+    html[dir='rtl'] #admin-pwa-ios-help {
+        left: 0;
+        right: auto;
+    }
+
+    html[dir='rtl'] #admin-sidebar .lg\:ml-0 {
+        margin-left: 0;
+        margin-right: 0;
+    }
+}

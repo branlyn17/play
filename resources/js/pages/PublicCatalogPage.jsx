@@ -1,37 +1,52 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import PublicLayout from '../components/public/PublicLayout';
+import { createTranslator } from '../lib/i18n';
 
-function normalizeCatalogContent(content = {}) {
+function normalizeCatalogContent(content = {}, t) {
     const hero = content.hero ?? {};
 
     return {
-        header: content.header ?? {},
-        hero: {
-            eyebrow: hero.eyebrow ?? '',
-            title: hero.title ?? '',
-            subtitle: hero.subtitle ?? '',
-            primaryAction: hero.primary_action ?? '',
-            secondaryAction: hero.secondary_action ?? '',
+        header: {
+            kicker: t('public.catalog.header.kicker', content.header?.kicker ?? ''),
+            cta: t('public.catalog.header.cta', content.header?.cta ?? ''),
         },
-        filtersLabel: content.filters_label ?? '',
-        visibleTemplatesLabel: content.visible_templates_label ?? '',
-        activeCategoriesLabel: content.active_categories_label ?? '',
-        allFilterLabel: content.all_filter_label ?? '',
-        categorySectionLabel: content.category_section_label ?? 'Coleccion',
-        categoryTemplatesLabel: content.category_templates_label ?? 'plantillas',
-        collectionHint: content.collection_hint ?? 'Desliza para explorar esta coleccion',
-        scrollPreviousLabel: content.scroll_previous_label ?? 'Anterior',
-        scrollNextLabel: content.scroll_next_label ?? 'Siguiente',
-        footer: content.footer ?? {},
-        viewLabel: content.view_label ?? '',
-        viewsLabel: content.views_label ?? '',
-        downloadsLabel: content.downloads_label ?? '',
-        usesLabel: content.uses_label ?? '',
-        premiumLabel: content.premium_label ?? '',
-        baseLabel: content.base_label ?? '',
-        emptyStateTitle: content.empty_state_title ?? '',
-        emptyStateText: content.empty_state_text ?? '',
+        hero: {
+            eyebrow: t('public.catalog.hero.eyebrow', hero.eyebrow ?? ''),
+            title: t('public.catalog.hero.title', hero.title ?? ''),
+            subtitle: t('public.catalog.hero.subtitle', hero.subtitle ?? ''),
+            primaryAction: t('public.catalog.hero.primary_action', hero.primary_action ?? ''),
+            secondaryAction: t('public.catalog.hero.secondary_action', hero.secondary_action ?? ''),
+        },
+        filtersLabel: t('public.catalog.filters_label', content.filters_label ?? ''),
+        visibleTemplatesLabel: t('public.catalog.visible_templates_label', content.visible_templates_label ?? ''),
+        activeCategoriesLabel: t('public.catalog.active_categories_label', content.active_categories_label ?? ''),
+        allFilterLabel: t('public.catalog.all_filter_label', content.all_filter_label ?? ''),
+        categorySectionLabel: t('public.catalog.category_section_label', content.category_section_label ?? 'Coleccion'),
+        categoryTemplatesLabel: t('public.catalog.category_templates_label', content.category_templates_label ?? 'plantillas'),
+        collectionHint: t('public.catalog.collection_hint', content.collection_hint ?? 'Desliza para explorar esta coleccion'),
+        scrollPreviousLabel: t('public.catalog.scroll_previous_label', content.scroll_previous_label ?? 'Anterior'),
+        scrollNextLabel: t('public.catalog.scroll_next_label', content.scroll_next_label ?? 'Siguiente'),
+        footer: {
+            left: t('public.catalog.footer.left', content.footer?.left ?? ''),
+            right: t('public.catalog.footer.right', content.footer?.right ?? ''),
+        },
+        viewLabel: t('public.catalog.view_label', content.view_label ?? ''),
+        viewsLabel: t('public.catalog.views_label', content.views_label ?? ''),
+        downloadsLabel: t('public.catalog.downloads_label', content.downloads_label ?? ''),
+        usesLabel: t('public.catalog.uses_label', content.uses_label ?? ''),
+        premiumLabel: t('public.catalog.premium_label', content.premium_label ?? ''),
+        baseLabel: t('public.catalog.base_label', content.base_label ?? ''),
+        emptyStateTitle: t('public.catalog.empty_state_title', content.empty_state_title ?? ''),
+        emptyStateText: t('public.catalog.empty_state_text', content.empty_state_text ?? ''),
+        uiLabels: {
+            theme_toggle: t('public.shared.header.theme_toggle', ''),
+            language: t('public.shared.header.language', ''),
+            menu: t('public.shared.header.menu', ''),
+            close: t('public.shared.header.close', ''),
+            dashboard: t('common.dashboard', ''),
+            logout: t('actions.logout', ''),
+        },
     };
 }
 
@@ -248,6 +263,7 @@ function CategoryCarousel({ appName, category, current, isLight }) {
 export default function PublicCatalogPage({
     appName,
     auth = {},
+    i18n = {},
     locale = 'es',
     locales = [],
     navigation = [],
@@ -258,9 +274,11 @@ export default function PublicCatalogPage({
     categoryCount = 0,
 }) {
     const [theme, setTheme] = useState('dark');
-    const current = useMemo(() => normalizeCatalogContent(content), [content]);
+    const t = useMemo(() => createTranslator(i18n), [i18n]);
+    const current = useMemo(() => normalizeCatalogContent(content, t), [content, t]);
     const filters = useMemo(() => [{ key: 'all', name: current.allFilterLabel }, ...categories], [categories, current.allFilterLabel]);
     const [activeFilter, setActiveFilter] = useState('all');
+    const direction = i18n.direction ?? 'ltr';
 
     useEffect(() => {
         const savedTheme = window.localStorage.getItem('invita-plus-theme');
@@ -309,6 +327,7 @@ export default function PublicCatalogPage({
         <PublicLayout
             appName={appName}
             auth={auth}
+            direction={direction}
             footerCopy={current.footer}
             theme={theme}
             headerProps={{
@@ -327,7 +346,10 @@ export default function PublicCatalogPage({
                     kicker: current.header.kicker ?? '',
                     cta: current.header.cta ?? '',
                 },
-                uiLabels: shared.header ?? {},
+                uiLabels: {
+                    ...(shared.header ?? {}),
+                    ...current.uiLabels,
+                },
             }}
         >
             <section className="px-2 pt-4">
